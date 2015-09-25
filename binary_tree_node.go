@@ -28,8 +28,8 @@ func (b *BinaryTreeNode) rightChan() chan Operation {
 	return b.right.parentChan
 }
 
-func makeBinaryTreeNode(element int) *BinaryTreeNode {
+func makeBinaryTreeNode(element int, initiallyRemoved bool) *BinaryTreeNode {
 	//TODO: Tweak buffer sizes
-	x := BinaryTreeNode{make(chan Operation, 64), make(chan OperationReply, 8), nil, nil, element, false}
+	x := BinaryTreeNode{make(chan Operation, 64), make(chan OperationReply, 8), nil, nil, element, initiallyRemoved}
 	return &x
 }
