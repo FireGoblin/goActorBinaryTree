@@ -1,24 +1,26 @@
 package main
 
+import "fmt"
+
 type Contains struct {
 	id            int
 	elem          int
 	requesterChan chan OperationReply
 }
 
-func (c *Contains) Id() int {
+func (c Contains) Id() int {
 	return c.id
 }
 
-func (c *Contains) Elem() int {
+func (c Contains) Elem() int {
 	return c.elem
 }
 
-func (c *Contains) RequesterChan() chan OperationReply {
+func (c Contains) RequesterChan() chan OperationReply {
 	return c.requesterChan
 }
 
-func (c *Contains) Perform(node *BinaryTreeNode) {
+func (c Contains) Perform(node *BinaryTreeNode) {
 	if c.elem == node.elem {
 		c.requesterChan <- ContainsResult{c.id, true}
 	} else if c.elem < node.elem {
@@ -34,4 +36,8 @@ func (c *Contains) Perform(node *BinaryTreeNode) {
 			c.requesterChan <- ContainsResult{c.id, false}
 		}
 	}
+}
+
+func (i Contains) String() string {
+	return fmt.Sprintf("Contains(id: %d, elem: %d)", i.id, i.elem)
 }

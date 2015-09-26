@@ -1,24 +1,26 @@
 package main
 
+import "fmt"
+
 type Insert struct {
 	id            int
 	elem          int
 	requesterChan chan OperationReply
 }
 
-func (i *Insert) Id() int {
+func (i Insert) Id() int {
 	return i.id
 }
 
-func (i *Insert) Elem() int {
+func (i Insert) Elem() int {
 	return i.elem
 }
 
-func (i *Insert) RequesterChan() chan OperationReply {
+func (i Insert) RequesterChan() chan OperationReply {
 	return i.requesterChan
 }
 
-func (i *Insert) Perform(node *BinaryTreeNode) {
+func (i Insert) Perform(node *BinaryTreeNode) {
 	if i.elem < node.elem {
 		if node.left != nil {
 			node.leftChan() <- i
@@ -32,4 +34,8 @@ func (i *Insert) Perform(node *BinaryTreeNode) {
 			node.right = makeBinaryTreeNode(i.elem, false)
 		}
 	}
+}
+
+func (i Insert) String() string {
+	return fmt.Sprintf("Insert(id: %d, elem: %d)", i.id, i.elem)
 }
