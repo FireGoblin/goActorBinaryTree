@@ -23,13 +23,18 @@ func (r Remove) RequesterChan() chan OperationReply {
 func (r Remove) Perform(node *BinaryTreeNode) {
 	if r.elem == node.elem {
 		node.removed = true
+		r.requesterChan <- OperationFinished{r.id}
 	} else if r.elem < node.elem {
 		if node.left != nil {
 			node.leftChan() <- r
+		} else {
+			r.requesterChan <- OperationFinished{r.id}
 		}
 	} else if r.elem > node.elem {
 		if node.right != nil {
 			node.rightChan() <- r
+		} else {
+			r.requesterChan <- OperationFinished{r.id}
 		}
 	}
 }

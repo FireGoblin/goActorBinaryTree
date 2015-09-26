@@ -48,25 +48,25 @@ func (t *TestProbe) sendOperation(o Operation) error {
 	return nil
 }
 
-func (t *TestProbe) checkReply(o OperationReply) (bool, error) {
+func (t *TestProbe) checkReply(o OperationReply) bool {
 	switch o.(type) {
 	case OperationFinished:
 		if t.finishedResponses[o.Id()] {
 			t.finishedResponses[o.Id()] = false
-			return true, nil
+			return true
 		} else {
-			return false, nil
+			return false
 		}
 	case ContainsResult:
 		c := o.(ContainsResult)
 		if t.finishedResponses[c.Id()] && t.expectedResponses[c.Id()] == c.Result() {
 			t.finishedResponses[c.Id()] = false
-			return true, nil
+			return true
 		} else {
-			return false, nil
+			return false
 		}
 	default:
-		return false, fmt.Errorf("unkown operationReply found in test probe")
+		return false
 	}
 }
 
@@ -80,19 +80,37 @@ func (t *TestProbe) checkReceviedAllResponses(o OperationReply) bool {
 	return true
 }
 
-func (t *TestProbe) coinFlip() bool {
-	return t.rng.Int()%2 == 0
+func (t *TestProbe) makeInsert(e int) Insert {
+	i := t.currentId
+	t.currentId++
+	return Insert{i, e, t.childReply}
 }
 
-func (t *TestProbe) negativeRand() int {
-	x := t.rng.Int31()
-
-	if t.coinFlip() {
-		x = -x
-	}
-
-	return int(x)
+func (t *TestProbe) makeContains(e int) Contains {
+	i := t.currentId
+	t.currentId++
+	return Contains{i, e, t.childReply}
 }
+
+func (t *TestProbe) makeRemove(e int) Remove {
+	i := t.currentId
+	t.currentId++
+	return Remove{i, e, t.childReply}
+}
+
+// func (t *TestProbe) coinFlip() bool {
+// 	return t.rng.Int()%2 == 0
+// }
+
+// func (t *TestProbe) negativeRand() int {
+// 	x := t.rng.Int31()
+
+// 	if t.coinFlip() {
+// 		x = -x
+// 	}
+
+// 	return int(x)
+// }
 
 // func (t *testProbe) makeInsert() Operation {
 // 	x := Insert{t.currentId, t.negativeRand(), childReply}

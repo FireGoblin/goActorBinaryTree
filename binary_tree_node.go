@@ -31,5 +31,16 @@ func (b *BinaryTreeNode) rightChan() chan Operation {
 func makeBinaryTreeNode(element int, initiallyRemoved bool) *BinaryTreeNode {
 	//TODO: Tweak buffer sizes
 	x := BinaryTreeNode{make(chan Operation, 64), make(chan OperationReply, 8), nil, nil, element, initiallyRemoved}
+	go x.Run()
 	return &x
+}
+
+func (b *BinaryTreeNode) Run() {
+	for {
+		select {
+		case op := <-b.parentChan:
+			op.Perform(b)
+		default:
+		}
+	}
 }

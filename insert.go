@@ -21,17 +21,22 @@ func (i Insert) RequesterChan() chan OperationReply {
 }
 
 func (i Insert) Perform(node *BinaryTreeNode) {
-	if i.elem < node.elem {
+	if i.elem == node.elem {
+		node.removed = false
+		i.requesterChan <- OperationFinished{i.id}
+	} else if i.elem < node.elem {
 		if node.left != nil {
 			node.leftChan() <- i
 		} else {
 			node.left = makeBinaryTreeNode(i.elem, false)
+			i.requesterChan <- OperationFinished{i.id}
 		}
 	} else if i.elem > node.elem {
 		if node.right != nil {
 			node.rightChan() <- i
 		} else {
 			node.right = makeBinaryTreeNode(i.elem, false)
+			i.requesterChan <- OperationFinished{i.id}
 		}
 	}
 }

@@ -20,5 +20,16 @@ func (b *BinaryTreeSet) childChan() chan Operation {
 
 func makeBinaryTreeSet() *BinaryTreeSet {
 	x := BinaryTreeSet{make(chan Operation, 256), make(chan OperationReply, 16), makeBinaryTreeNode(0, true), make(chan bool, 1)}
+	go x.Run()
 	return &x
+}
+
+func (b *BinaryTreeSet) Run() {
+	for {
+		select {
+		case op := <-b.parentChan:
+			b.childChan() <- op
+		default:
+		}
+	}
 }
