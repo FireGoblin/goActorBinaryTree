@@ -1,8 +1,9 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"testing"
+	"time"
 )
 
 func TestInsertsAndContains(t *testing.T) {
@@ -46,5 +47,30 @@ func TestInsertsAndContains(t *testing.T) {
 	} else {
 		t.FailNow()
 	}
+}
 
+func TestInstructionExample(t *testing.T) {
+	testProbe := makeTestProbe()
+
+	go testProbe.Run(t)
+
+	one := testProbe.makeInsert(1)
+	two := testProbe.makeContains(2)
+	three := testProbe.makeRemove(1)
+	four := testProbe.makeInsert(2)
+	five := testProbe.makeContains(1)
+	six := testProbe.makeContains(2)
+
+	testProbe.sendOperation(one)
+	testProbe.sendOperation(two)
+	testProbe.sendOperation(three)
+	testProbe.sendOperation(four)
+	testProbe.sendOperation(five)
+	testProbe.sendOperation(six)
+
+	time.Sleep(1 * time.Second)
+
+	testProbe.done <- true
+
+	time.Sleep(100 * time.Millisecond)
 }

@@ -22,7 +22,7 @@ func (c Contains) RequesterChan() chan OperationReply {
 
 func (c Contains) Perform(node *BinaryTreeNode) {
 	if c.elem == node.elem {
-		c.requesterChan <- ContainsResult{c.id, true}
+		c.requesterChan <- ContainsResult{c.id, !node.removed}
 	} else if c.elem < node.elem {
 		if node.left != nil {
 			node.leftChan() <- c

@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"testing"
 )
 
 type TestProbe struct {
 	childReply chan OperationReply
+	done       chan bool
 
 	tree *BinaryTreeSet
 
@@ -19,8 +21,25 @@ type TestProbe struct {
 	rng *rand.Rand
 }
 
+func (t *TestProbe) Run(test *testing.T) {
+	for {
+		select {
+		case msg := <-t.childReply:
+			fmt.Println(msg)
+			if !t.checkReply(msg) {
+				test.FailNow()
+			}
+		case <-t.done:
+			fmt.Println("checking all replies received")
+			if !t.checkReceviedAllResponses() {
+				test.FailNow()
+			}
+		}
+	}
+}
+
 func makeTestProbe() *TestProbe {
-	x := TestProbe{make(chan OperationReply, 256), makeBinaryTreeSet(), make(map[int]bool), make(map[int]bool), make(map[int]bool), 1, rand.New(rand.NewSource(777))}
+	x := TestProbe{make(chan OperationReply, 256), make(chan bool), makeBinaryTreeSet(), make(map[int]bool), make(map[int]bool), make(map[int]bool), 1, rand.New(rand.NewSource(777))}
 	return &x
 }
 
@@ -70,7 +89,7 @@ func (t *TestProbe) checkReply(o OperationReply) bool {
 	}
 }
 
-func (t *TestProbe) checkReceviedAllResponses(o OperationReply) bool {
+func (t *TestProbe) checkReceviedAllResponses() bool {
 	for _, v := range t.finishedResponses {
 		if v {
 			return false
