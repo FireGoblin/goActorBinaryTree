@@ -67,6 +67,10 @@ func (t *TestProbe) sendOperation(o Operation) error {
 	return nil
 }
 
+func (t *TestProbe) sendGC() {
+	t.tree.gcChan <- true
+}
+
 func (t *TestProbe) checkReply(o OperationReply) bool {
 	switch o.(type) {
 	case OperationFinished:

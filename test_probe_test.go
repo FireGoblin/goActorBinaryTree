@@ -68,9 +68,9 @@ func TestInstructionExample(t *testing.T) {
 	testProbe.sendOperation(five)
 	testProbe.sendOperation(six)
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(100 * time.Millisecond)
 
 	testProbe.done <- true
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 }
