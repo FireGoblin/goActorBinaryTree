@@ -1,4 +1,4 @@
-package main
+package ActorBinaryTree
 
 //max two children
 type BinaryTreeNode struct {
