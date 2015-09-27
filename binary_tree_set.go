@@ -2,7 +2,7 @@ package main
 
 //max two children
 type BinaryTreeSet struct {
-	parentChan chan Operation
+	opChan     chan Operation
 	childReply chan OperationReply
 
 	root         *BinaryTreeNode
@@ -19,7 +19,7 @@ func (b *BinaryTreeSet) rootChan() chan Operation {
 		return nil
 	}
 
-	return b.root.parentChan
+	return b.root.opChan
 }
 
 func (b *BinaryTreeSet) transferRootChan() chan Operation {
@@ -27,11 +27,12 @@ func (b *BinaryTreeSet) transferRootChan() chan Operation {
 		return nil
 	}
 
-	return b.transferRoot.parentChan
+	return b.transferRoot.opChan
 }
 
 func makeBinaryTreeSet() *BinaryTreeSet {
 	x := BinaryTreeSet{make(chan Operation, 256), make(chan OperationReply, 16), makeBinaryTreeNode(0, true), nil, make(chan bool, 16), make(chan Operation, 1024), -1}
+	x.root.parent = x.childReply
 	go x.Run()
 	return &x
 }
@@ -39,13 +40,14 @@ func makeBinaryTreeSet() *BinaryTreeSet {
 func (b *BinaryTreeSet) Run() {
 	for {
 		select {
-		case op := <-b.parentChan:
+		case op := <-b.opChan:
 			b.rootChan() <- op
 		case <-b.childReply:
 			panic("received a child reply at root that should only happen while gcing")
 		case gc := <-b.gcChan:
 			if gc {
 				b.transferRoot = makeBinaryTreeNode(0, true)
+				b.transferRoot.parent = b.childReply
 				b.runGC()
 			}
 		default:
@@ -56,10 +58,8 @@ func (b *BinaryTreeSet) Run() {
 func (b *BinaryTreeSet) runGC() {
 	for {
 		select {
-		case op := <-b.parentChan:
+		case op := <-b.opChan:
 			switch op.(type) {
-			case CopyInsert:
-				b.transferRootChan() <- op
 			default:
 				b.pendingQueue <- op
 			}
@@ -72,6 +72,9 @@ func (b *BinaryTreeSet) runGC() {
 				} else {
 					panic("received bad id for OperationFinished")
 				}
+			case CopyInsert:
+				c := opRep.(CopyInsert)
+				b.transferRootChan() <- c
 			default:
 				panic("should only receive OperationFinished in childReply at root")
 			}

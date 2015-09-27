@@ -2,14 +2,19 @@ package main
 
 //max two children
 type BinaryTreeNode struct {
-	parentChan chan Operation
-	childChan  chan OperationReply
+	parent chan OperationReply
 
-	left  *BinaryTreeNode //use left.parentChan for sending operations to it
-	right *BinaryTreeNode //use right.parentChan for sending operations to it
+	opChan     chan Operation
+	childReply chan OperationReply
+
+	left  *BinaryTreeNode //use left.opChan for sending operations to it
+	right *BinaryTreeNode //use right.opChan for sending operations to it
 
 	elem    int
 	removed bool
+
+	//elements for tracking gc
+	gcOperationResponses ReplyTracker
 }
 
 func (b *BinaryTreeNode) leftChan() chan Operation {
@@ -17,7 +22,7 @@ func (b *BinaryTreeNode) leftChan() chan Operation {
 		return nil
 	}
 
-	return b.left.parentChan
+	return b.left.opChan
 }
 
 func (b *BinaryTreeNode) rightChan() chan Operation {
@@ -25,12 +30,12 @@ func (b *BinaryTreeNode) rightChan() chan Operation {
 		return nil
 	}
 
-	return b.right.parentChan
+	return b.right.opChan
 }
 
 func makeBinaryTreeNode(element int, initiallyRemoved bool) *BinaryTreeNode {
 	//TODO: Tweak buffer sizes
-	x := BinaryTreeNode{make(chan Operation, 64), make(chan OperationReply, 8), nil, nil, element, initiallyRemoved}
+	x := BinaryTreeNode{nil, make(chan Operation, 64), make(chan OperationReply, 8), nil, nil, element, initiallyRemoved, make(map[int]bool)}
 	go x.Run()
 	return &x
 }
@@ -38,7 +43,7 @@ func makeBinaryTreeNode(element int, initiallyRemoved bool) *BinaryTreeNode {
 func (b *BinaryTreeNode) Run() {
 	for {
 		select {
-		case op := <-b.parentChan:
+		case op := <-b.opChan:
 			op.Perform(b)
 		default:
 		}

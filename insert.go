@@ -29,6 +29,7 @@ func (i Insert) Perform(node *BinaryTreeNode) {
 			node.leftChan() <- i
 		} else {
 			node.left = makeBinaryTreeNode(i.elem, false)
+			node.left.parent = node.childReply
 			i.requesterChan <- OperationFinished{i.id}
 		}
 	} else if i.elem > node.elem {
@@ -36,6 +37,7 @@ func (i Insert) Perform(node *BinaryTreeNode) {
 			node.rightChan() <- i
 		} else {
 			node.right = makeBinaryTreeNode(i.elem, false)
+			node.right.parent = node.childReply
 			i.requesterChan <- OperationFinished{i.id}
 		}
 	}

@@ -14,7 +14,7 @@ type TestProbe struct {
 
 	currentTree       map[int]bool //track what has been inserted
 	expectedResponses map[int]bool //track expected responses to contains requests
-	finishedResponses map[int]bool
+	finishedResponses ReplyTracker
 
 	currentId int
 
@@ -44,20 +44,20 @@ func makeTestProbe() *TestProbe {
 }
 
 func (t *TestProbe) childChan() chan Operation {
-	return t.tree.parentChan
+	return t.tree.opChan
 }
 
 func (t *TestProbe) sendOperation(o Operation) error {
 	switch o.(type) {
 	case Insert:
 		t.currentTree[o.Elem()] = true
-		t.finishedResponses[o.Id()] = true
+		t.finishedResponses.sentOp(o)
 	case Remove:
 		t.currentTree[o.Elem()] = false
-		t.finishedResponses[o.Id()] = true
+		t.finishedResponses.sentOp(o)
 	case Contains:
 		t.expectedResponses[o.Id()] = t.currentTree[o.Elem()]
-		t.finishedResponses[o.Id()] = true
+		t.finishedResponses.sentOp(o)
 	default:
 		return fmt.Errorf("unknown operation found in test probe")
 	}
@@ -75,7 +75,7 @@ func (t *TestProbe) checkReply(o OperationReply) bool {
 	switch o.(type) {
 	case OperationFinished:
 		if t.finishedResponses[o.Id()] {
-			t.finishedResponses[o.Id()] = false
+			t.finishedResponses.receivedReply(o)
 			return true
 		} else {
 			return false
@@ -83,7 +83,7 @@ func (t *TestProbe) checkReply(o OperationReply) bool {
 	case ContainsResult:
 		c := o.(ContainsResult)
 		if t.finishedResponses[c.Id()] && t.expectedResponses[c.Id()] == c.Result() {
-			t.finishedResponses[c.Id()] = false
+			t.finishedResponses.receivedReply(c)
 			return true
 		} else {
 			return false
@@ -94,13 +94,7 @@ func (t *TestProbe) checkReply(o OperationReply) bool {
 }
 
 func (t *TestProbe) checkReceviedAllResponses() bool {
-	for _, v := range t.finishedResponses {
-		if v {
-			return false
-		}
-	}
-
-	return true
+	return t.finishedResponses.checkAllReceived()
 }
 
 func (t *TestProbe) makeInsert(e int) Insert {
