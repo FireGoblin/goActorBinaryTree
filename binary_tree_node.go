@@ -15,6 +15,7 @@ type BinaryTreeNode struct {
 
 	//elements for tracking gc
 	gcOperationResponses ReplyTracker
+	getElemResponse      *OperationFinished
 }
 
 func (b *BinaryTreeNode) leftChan() chan Operation {
@@ -35,7 +36,7 @@ func (b *BinaryTreeNode) rightChan() chan Operation {
 
 func makeBinaryTreeNode(element int, initiallyRemoved bool) *BinaryTreeNode {
 	//TODO: Tweak buffer sizes
-	x := BinaryTreeNode{nil, make(chan Operation, 64), make(chan OperationReply, 8), nil, nil, element, initiallyRemoved, make(map[int]bool)}
+	x := BinaryTreeNode{nil, make(chan Operation, 64), make(chan OperationReply, 8), nil, nil, element, initiallyRemoved, make(map[int]bool), nil}
 	go x.Run()
 	return &x
 }
@@ -45,6 +46,11 @@ func (b *BinaryTreeNode) Run() {
 		select {
 		case op := <-b.opChan:
 			op.Perform(b)
+		case opRep := <-b.childReply:
+			b.gcOperationResponses.receivedReply(opRep)
+			if b.gcOperationResponses.checkAllReceived() {
+				b.parent <- *b.getElemResponse
+			}
 		default:
 		}
 	}

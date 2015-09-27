@@ -1,7 +1,7 @@
 package main
 
 import (
-	//"fmt"
+	"fmt"
 	"testing"
 	"time"
 )
@@ -47,6 +47,8 @@ func TestInsertsAndContains(t *testing.T) {
 	} else {
 		t.FailNow()
 	}
+
+	fmt.Println("Inserts and Contains succeeded")
 }
 
 func TestInstructionExample(t *testing.T) {

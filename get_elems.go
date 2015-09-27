@@ -24,6 +24,7 @@ func (i GetElems) RequesterChan() chan OperationReply {
 }
 
 func (i GetElems) Perform(node *BinaryTreeNode) {
+	node.getElemResponse = &OperationFinished{i.Id()}
 	if node.left == nil {
 		op := GetElems{math.MinInt32, i.requesterChan}
 		node.gcOperationResponses.sentOp(op)

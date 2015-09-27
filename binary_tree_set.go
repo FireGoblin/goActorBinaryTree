@@ -59,10 +59,7 @@ func (b *BinaryTreeSet) runGC() {
 	for {
 		select {
 		case op := <-b.opChan:
-			switch op.(type) {
-			default:
-				b.pendingQueue <- op
-			}
+			b.pendingQueue <- op
 		case opRep := <-b.childReply:
 			switch opRep.(type) {
 			case OperationFinished:
