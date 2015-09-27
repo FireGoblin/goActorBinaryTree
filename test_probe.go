@@ -123,9 +123,74 @@ func (t *TestProbe) makeRemove(e int) Remove {
 	return Remove{i, e, t.childReply}
 }
 
-// func (t *TestProbe) coinFlip() bool {
-// 	return t.rng.Int()%2 == 0
-// }
+func (t *TestProbe) coinFlip() bool {
+	return t.rng.Int()%2 == 0
+}
+
+// random element between (MinInt8, MaxInt8) (exclusive)
+func (t *TestProbe) randomElement8() int {
+	flip := t.coinFlip()
+	val := t.rng.Int31n(math.MaxInt8)
+
+	if flip {
+		if val == 0 {
+			val = math.MinInt8 + 1
+		} else {
+			val = -val
+		}
+	}
+
+	return int(val)
+}
+
+// random element between (MinInt16, MaxInt16) (exclusive)
+func (t *TestProbe) randomElement16() int {
+	flip := t.coinFlip()
+	val := t.rng.Int31n(math.MaxInt16)
+
+	if flip {
+		if val == 0 {
+			val = math.MinInt16 + 1
+		} else {
+			val = -val
+		}
+	}
+
+	return int(val)
+}
+
+// random element between (MinInt32, MaxInt32) (exclusive)
+func (t *TestProbe) randomElement32() int {
+	flip := t.coinFlip()
+	val := t.rng.Int31n(math.MaxInt32)
+
+	if flip {
+		if val == 0 {
+			val = math.MinInt32 + 1
+		} else {
+			val = -val
+		}
+	}
+
+	return int(val)
+}
+
+func (t *TestProbe) randomOperation() Operation {
+	val := t.rng.Int31n(4)
+
+	switch val {
+	case 0:
+		return t.makeInsert(t.randomElement8())
+	case 1:
+		return t.makeInsert(t.randomElement8())
+	case 2:
+		return t.makeContains(t.randomElement8())
+	case 3:
+		return t.makeRemove(t.randomElement8())
+	}
+
+	return nil
+}
 
 // func (t *TestProbe) negativeRand() int {
 // 	x := t.rng.Int31()

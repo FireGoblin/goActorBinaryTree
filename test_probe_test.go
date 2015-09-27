@@ -76,3 +76,27 @@ func TestInstructionExample(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 }
+
+func TestWorkWithGC(t *testing.T) {
+	testProbe := makeTestProbe()
+
+	go testProbe.Run(t)
+
+	count := 1000
+
+	for i := 0; i < count; i++ {
+		err := testProbe.sendOperation(testProbe.randomOperation())
+		if err != nil {
+			t.FailNow()
+		}
+		if testProbe.rng.Float32() < 0.05 {
+			testProbe.sendGC()
+		}
+	}
+
+	time.Sleep(1 * time.Second)
+
+	testProbe.done <- true
+
+	time.Sleep(100 * time.Millisecond)
+}
