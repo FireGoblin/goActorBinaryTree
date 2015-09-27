@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 	"testing"
 )
@@ -100,18 +101,27 @@ func (t *TestProbe) checkReceviedAllResponses() bool {
 func (t *TestProbe) makeInsert(e int) Insert {
 	i := t.currentId
 	t.currentId++
+	if t.currentId == math.MaxInt32 {
+		t.currentId = 1
+	}
 	return Insert{i, e, t.childReply}
 }
 
 func (t *TestProbe) makeContains(e int) Contains {
 	i := t.currentId
 	t.currentId++
+	if t.currentId == math.MaxInt32 {
+		t.currentId = 1
+	}
 	return Contains{i, e, t.childReply}
 }
 
 func (t *TestProbe) makeRemove(e int) Remove {
 	i := t.currentId
 	t.currentId++
+	if t.currentId == math.MaxInt32 {
+		t.currentId = 1
+	}
 	return Remove{i, e, t.childReply}
 }
 

@@ -1,5 +1,7 @@
 package main
 
+import "math"
+
 //max two children
 type BinaryTreeSet struct {
 	opChan     chan Operation
@@ -65,6 +67,9 @@ func (b *BinaryTreeSet) runGC() {
 			case OperationFinished:
 				if opRep.Id() == b.currentId {
 					b.currentId--
+					if b.currentId == math.MinInt32 {
+						b.currentId = -1
+					}
 					b.gcChan <- false
 				} else {
 					panic("received bad id for OperationFinished")
