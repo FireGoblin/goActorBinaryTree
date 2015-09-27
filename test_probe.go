@@ -98,30 +98,28 @@ func (t *TestProbe) checkReceviedAllResponses() bool {
 	return t.finishedResponses.checkAllReceived()
 }
 
-func (t *TestProbe) makeInsert(e int) Insert {
-	i := t.currentId
+func (t *TestProbe) incrementId() {
 	t.currentId++
 	if t.currentId == math.MaxInt32 {
 		t.currentId = 1
 	}
+}
+
+func (t *TestProbe) makeInsert(e int) Insert {
+	i := t.currentId
+	t.incrementId()
 	return Insert{i, e, t.childReply}
 }
 
 func (t *TestProbe) makeContains(e int) Contains {
 	i := t.currentId
-	t.currentId++
-	if t.currentId == math.MaxInt32 {
-		t.currentId = 1
-	}
+	t.incrementId()
 	return Contains{i, e, t.childReply}
 }
 
 func (t *TestProbe) makeRemove(e int) Remove {
 	i := t.currentId
-	t.currentId++
-	if t.currentId == math.MaxInt32 {
-		t.currentId = 1
-	}
+	t.incrementId()
 	return Remove{i, e, t.childReply}
 }
 
