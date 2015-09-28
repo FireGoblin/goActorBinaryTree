@@ -19,8 +19,6 @@ type TestProbe struct {
 	currentId int
 
 	rng *rand.Rand
-
-	responseCount int
 }
 
 func (t *TestProbe) displayUnreceived() {
@@ -32,10 +30,6 @@ func (t *TestProbe) Run(succeed chan bool, fail chan bool) {
 		select {
 		case msg := <-t.childReply:
 			//fmt.Println(msg)
-			t.responseCount++
-			// if t.responseCount%100 == 0 {
-			// 	fmt.Println(t.responseCount)
-			// }
 			if !t.checkReply(msg) {
 				fail <- true
 			}
@@ -54,7 +48,7 @@ func (t *TestProbe) Run(succeed chan bool, fail chan bool) {
 }
 
 func makeTestProbe() *TestProbe {
-	x := TestProbe{make(chan OperationReply, 1024), makeBinaryTreeSet(), make(map[int]bool), make(map[int]bool), make(map[int]bool), 1, rand.New(rand.NewSource(777)), 0}
+	x := TestProbe{make(chan OperationReply, 1024), makeBinaryTreeSet(), make(map[int]bool), make(map[int]bool), make(map[int]bool), 1, rand.New(rand.NewSource(777))}
 	return &x
 }
 

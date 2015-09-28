@@ -58,6 +58,9 @@ func (b *BinaryTreeNode) Run() {
 			b.gcOperationResponses.receivedReply(opRep)
 			if b.gcOperationResponses.checkAllReceived() {
 				b.parent <- b.getElemResponse
+				b.left = nil
+				b.right = nil
+				return
 			}
 		default:
 		}

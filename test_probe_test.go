@@ -147,8 +147,8 @@ func TestWorkWithGC(t *testing.T) {
 			t.FailNow()
 		}
 
-		if testProbe.rng.Float32() < 0.05 {
-			//testProbe.sendGC()
+		if testProbe.rng.Float32() < 0.01 {
+			testProbe.sendGC()
 		}
 	}
 
