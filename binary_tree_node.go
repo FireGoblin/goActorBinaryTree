@@ -1,5 +1,7 @@
 package ActorBinaryTree
 
+import "fmt"
+
 //max two children
 type BinaryTreeNode struct {
 	parent chan OperationReply
@@ -15,7 +17,11 @@ type BinaryTreeNode struct {
 
 	//elements for tracking gc
 	gcOperationResponses ReplyTracker
-	getElemResponse      *OperationFinished
+	getElemResponse      OperationFinished
+}
+
+func (b *BinaryTreeNode) String() string {
+	return fmt.Sprintf("Node(elem: %d, removed: %t)", b.elem, b.removed)
 }
 
 func (b *BinaryTreeNode) leftChan() chan Operation {
@@ -36,7 +42,7 @@ func (b *BinaryTreeNode) rightChan() chan Operation {
 
 func makeBinaryTreeNode(element int, initiallyRemoved bool) *BinaryTreeNode {
 	//TODO: Tweak buffer sizes
-	x := BinaryTreeNode{nil, make(chan Operation, 1024), make(chan OperationReply, 32), nil, nil, element, initiallyRemoved, make(map[int]bool), nil}
+	x := BinaryTreeNode{nil, make(chan Operation, 1024), make(chan OperationReply, 32), nil, nil, element, initiallyRemoved, make(map[int]bool), OperationFinished{0}}
 	go x.Run()
 	return &x
 }
@@ -47,9 +53,11 @@ func (b *BinaryTreeNode) Run() {
 		case op := <-b.opChan:
 			op.Perform(b)
 		case opRep := <-b.childReply:
+			//fmt.Println(b)
+			//fmt.Println(opRep)
 			b.gcOperationResponses.receivedReply(opRep)
 			if b.gcOperationResponses.checkAllReceived() {
-				b.parent <- *b.getElemResponse
+				b.parent <- b.getElemResponse
 			}
 		default:
 		}

@@ -1,6 +1,9 @@
 package ActorBinaryTree
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 //max two children
 type BinaryTreeSet struct {
@@ -10,7 +13,6 @@ type BinaryTreeSet struct {
 	root         *BinaryTreeNode
 	transferRoot *BinaryTreeNode
 
-	gcChan       chan bool
 	pendingQueue chan Operation
 
 	currentId int
@@ -33,7 +35,7 @@ func (b *BinaryTreeSet) transferRootChan() chan Operation {
 }
 
 func makeBinaryTreeSet() *BinaryTreeSet {
-	x := BinaryTreeSet{make(chan Operation, 1024), make(chan OperationReply, 32), makeBinaryTreeNode(0, true), nil, make(chan bool, 32), make(chan Operation, 1024), -1}
+	x := BinaryTreeSet{make(chan Operation, 1024), make(chan OperationReply, 32), makeBinaryTreeNode(0, true), nil, make(chan Operation, 1024), -1}
 	x.root.parent = x.childReply
 	go x.Run()
 	return &x
@@ -42,27 +44,39 @@ func makeBinaryTreeSet() *BinaryTreeSet {
 func (b *BinaryTreeSet) Run() {
 	for {
 		select {
-		case op := <-b.opChan:
-			b.rootChan() <- op
-		case <-b.childReply:
-			panic("received a child reply at root that should only happen while gcing")
-		case gc := <-b.gcChan:
-			if gc {
+		case op := <-b.pendingQueue:
+			_, ok := op.(GC)
+			if ok {
 				b.transferRoot = makeBinaryTreeNode(0, true)
 				b.transferRoot.parent = b.childReply
+				fmt.Println("moving to GC")
 				b.runGC()
+			} else {
+				b.rootChan() <- op
 			}
+		case op := <-b.opChan:
+			_, ok := op.(GC)
+			if ok {
+				b.transferRoot = makeBinaryTreeNode(0, true)
+				b.transferRoot.parent = b.childReply
+				fmt.Println("moving to GC")
+				b.runGC()
+			} else {
+				b.rootChan() <- op
+			}
+		case <-b.childReply:
+			panic("received a child reply at root that should only happen while gcing")
 		default:
 		}
 	}
 }
 
 func (b *BinaryTreeSet) runGC() {
+	b.rootChan() <- GetElems{b.currentId, b.childReply}
 	for {
 		select {
-		case op := <-b.opChan:
-			b.pendingQueue <- op
 		case opRep := <-b.childReply:
+			//fmt.Println("opRep received:", opRep)
 			switch opRep.(type) {
 			case OperationFinished:
 				if opRep.Id() == b.currentId {
@@ -70,7 +84,10 @@ func (b *BinaryTreeSet) runGC() {
 					if b.currentId == math.MinInt32 {
 						b.currentId = -1
 					}
-					b.gcChan <- false
+					fmt.Println("GC Over")
+					b.root = b.transferRoot
+					b.transferRoot = nil
+					return
 				} else {
 					panic("received bad id for OperationFinished")
 				}
@@ -80,15 +97,9 @@ func (b *BinaryTreeSet) runGC() {
 			default:
 				panic("should only receive OperationFinished in childReply at root")
 			}
-		case gc := <-b.gcChan:
-			if !gc {
-				b.root = b.transferRoot
-				b.transferRoot = nil
-				for op := range b.pendingQueue {
-					b.rootChan() <- op
-				}
-				return
-			}
+		case op := <-b.opChan:
+			//fmt.Println("move to pending queue")
+			b.pendingQueue <- op
 		default:
 		}
 	}

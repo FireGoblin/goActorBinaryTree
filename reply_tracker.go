@@ -27,3 +27,11 @@ func (r ReplyTracker) checkAllReceived() bool {
 
 	return true
 }
+
+func (r ReplyTracker) displayUnreceived() {
+	for k, v := range r {
+		if v {
+			fmt.Println(k)
+		}
+	}
+}

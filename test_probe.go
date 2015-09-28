@@ -23,6 +23,10 @@ type TestProbe struct {
 	responseCount int
 }
 
+func (t *TestProbe) displayUnreceived() {
+	t.finishedResponses.displayUnreceived()
+}
+
 func (t *TestProbe) Run(succeed chan bool, fail chan bool) {
 	for {
 		select {
@@ -35,10 +39,11 @@ func (t *TestProbe) Run(succeed chan bool, fail chan bool) {
 			if !t.checkReply(msg) {
 				fail <- true
 			}
-		case <-time.After(1 * time.Second):
+		case <-time.After(10 * time.Second):
 			fmt.Println("checking all replies received")
 			if !t.checkReceviedAllResponses() {
 				fmt.Println("not all responses found")
+				t.displayUnreceived()
 				fail <- true
 			} else {
 				fmt.Println("all responses received")
@@ -79,10 +84,11 @@ func (t *TestProbe) sendOperation(o Operation) error {
 }
 
 func (t *TestProbe) sendGC() {
-	t.tree.gcChan <- true
+	t.childChan() <- GC{}
 }
 
 func (t *TestProbe) checkReply(o OperationReply) bool {
+	//fmt.Println(o)
 	switch o.(type) {
 	case OperationFinished:
 		if t.finishedResponses[o.Id()] {
