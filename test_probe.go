@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
-	"testing"
+	"time"
 )
 
 type TestProbe struct {
 	childReply chan OperationReply
-	done       chan bool
 
 	tree *BinaryTreeSet
 
@@ -20,27 +19,37 @@ type TestProbe struct {
 	currentId int
 
 	rng *rand.Rand
+
+	responseCount int
 }
 
-func (t *TestProbe) Run(test *testing.T) {
+func (t *TestProbe) Run(succeed chan bool, fail chan bool) {
 	for {
 		select {
 		case msg := <-t.childReply:
-			fmt.Println(msg)
+			//fmt.Println(msg)
+			t.responseCount++
+			// if t.responseCount%100 == 0 {
+			// 	fmt.Println(t.responseCount)
+			// }
 			if !t.checkReply(msg) {
-				test.FailNow()
+				fail <- true
 			}
-		case <-t.done:
+		case <-time.After(1 * time.Second):
 			fmt.Println("checking all replies received")
 			if !t.checkReceviedAllResponses() {
-				test.FailNow()
+				fmt.Println("not all responses found")
+				fail <- true
+			} else {
+				fmt.Println("all responses received")
+				succeed <- true
 			}
 		}
 	}
 }
 
 func makeTestProbe() *TestProbe {
-	x := TestProbe{make(chan OperationReply, 256), make(chan bool), makeBinaryTreeSet(), make(map[int]bool), make(map[int]bool), make(map[int]bool), 1, rand.New(rand.NewSource(777))}
+	x := TestProbe{make(chan OperationReply, 1024), makeBinaryTreeSet(), make(map[int]bool), make(map[int]bool), make(map[int]bool), 1, rand.New(rand.NewSource(777)), 0}
 	return &x
 }
 
@@ -49,6 +58,7 @@ func (t *TestProbe) childChan() chan Operation {
 }
 
 func (t *TestProbe) sendOperation(o Operation) error {
+	//fmt.Println(o)
 	switch o.(type) {
 	case Insert:
 		t.currentTree[o.Elem()] = true
@@ -191,27 +201,3 @@ func (t *TestProbe) randomOperation() Operation {
 
 	return nil
 }
-
-// func (t *TestProbe) negativeRand() int {
-// 	x := t.rng.Int31()
-
-// 	if t.coinFlip() {
-// 		x = -x
-// 	}
-
-// 	return int(x)
-// }
-
-// func (t *testProbe) makeInsert() Operation {
-// 	x := Insert{t.currentId, t.negativeRand(), childReply}
-// 	return x
-// }
-
-// func (t *testProbe) makeContains() Operation {
-// 	// if greater than 0 then pick a number that exists
-// 	treeSize := len(t.currentTree)
-// 	if t.coinFlip()  && treeSize > 0 {
-// 		x := t.rng.Int31n(treeSize)
-
-// 	}
-// }

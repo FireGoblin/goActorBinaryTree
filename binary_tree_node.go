@@ -36,7 +36,7 @@ func (b *BinaryTreeNode) rightChan() chan Operation {
 
 func makeBinaryTreeNode(element int, initiallyRemoved bool) *BinaryTreeNode {
 	//TODO: Tweak buffer sizes
-	x := BinaryTreeNode{nil, make(chan Operation, 64), make(chan OperationReply, 8), nil, nil, element, initiallyRemoved, make(map[int]bool), nil}
+	x := BinaryTreeNode{nil, make(chan Operation, 1024), make(chan OperationReply, 32), nil, nil, element, initiallyRemoved, make(map[int]bool), nil}
 	go x.Run()
 	return &x
 }
