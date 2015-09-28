@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"sync"
 	"time"
 )
 
@@ -32,23 +33,27 @@ func (t *TestProbe) Run(succeed chan bool, fail chan bool) {
 			//fmt.Println(msg)
 			if !t.checkReply(msg) {
 				fail <- true
+				fmt.Println("failed in checkReply")
+				return
 			}
-		case <-time.After(10 * time.Second):
+		case <-time.After(1 * time.Second):
 			fmt.Println("checking all replies received")
 			if !t.checkReceviedAllResponses() {
 				fmt.Println("not all responses found")
 				t.displayUnreceived()
 				fail <- true
+				return
 			} else {
 				fmt.Println("all responses received")
 				succeed <- true
+				return
 			}
 		}
 	}
 }
 
 func makeTestProbe() *TestProbe {
-	x := TestProbe{make(chan OperationReply, 1024), makeBinaryTreeSet(), make(map[int]bool), make(map[int]bool), make(map[int]bool), 1, rand.New(rand.NewSource(777))}
+	x := TestProbe{make(chan OperationReply, 1024), makeBinaryTreeSet(), make(map[int]bool), make(map[int]bool), ReplyTracker{make(map[int]bool), &sync.Mutex{}}, 1, rand.New(rand.NewSource(777))}
 	return &x
 }
 
@@ -85,7 +90,7 @@ func (t *TestProbe) checkReply(o OperationReply) bool {
 	//fmt.Println(o)
 	switch o.(type) {
 	case OperationFinished:
-		if t.finishedResponses[o.Id()] {
+		if t.finishedResponses.get(o.Id()) {
 			t.finishedResponses.receivedReply(o)
 			return true
 		} else {
@@ -93,7 +98,7 @@ func (t *TestProbe) checkReply(o OperationReply) bool {
 		}
 	case ContainsResult:
 		c := o.(ContainsResult)
-		if t.finishedResponses[c.Id()] && t.expectedResponses[c.Id()] == c.Result() {
+		if t.finishedResponses.get(c.Id()) && t.expectedResponses[c.Id()] == c.Result() {
 			t.finishedResponses.receivedReply(c)
 			return true
 		} else {

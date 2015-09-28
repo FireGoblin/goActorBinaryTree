@@ -1,6 +1,7 @@
 package ActorBinaryTree
 
 import "fmt"
+import "sync"
 
 //max two children
 type BinaryTreeNode struct {
@@ -42,7 +43,7 @@ func (b *BinaryTreeNode) rightChan() chan Operation {
 
 func makeBinaryTreeNode(element int, initiallyRemoved bool) *BinaryTreeNode {
 	//TODO: Tweak buffer sizes
-	x := BinaryTreeNode{nil, make(chan Operation, 1024), make(chan OperationReply, 32), nil, nil, element, initiallyRemoved, make(map[int]bool), OperationFinished{0}}
+	x := BinaryTreeNode{nil, make(chan Operation, 1024), make(chan OperationReply, 32), nil, nil, element, initiallyRemoved, ReplyTracker{make(map[int]bool), &sync.Mutex{}}, OperationFinished{0}}
 	go x.Run()
 	return &x
 }
@@ -62,7 +63,7 @@ func (b *BinaryTreeNode) Run() {
 				b.right = nil
 				return
 			}
-		default:
+			//default:
 		}
 	}
 }

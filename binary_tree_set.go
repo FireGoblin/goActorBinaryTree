@@ -66,7 +66,7 @@ func (b *BinaryTreeSet) Run() {
 			}
 		case <-b.childReply:
 			panic("received a child reply at root that should only happen while gcing")
-		default:
+			//default:
 		}
 	}
 }
@@ -95,12 +95,12 @@ func (b *BinaryTreeSet) runGC() {
 				c := opRep.(CopyInsert)
 				b.transferRootChan() <- c
 			default:
-				panic("should only receive OperationFinished in childReply at root")
+				panic("should only receive OperationFinished and CopyInsert in childReply at root")
 			}
 		case op := <-b.opChan:
 			//fmt.Println("move to pending queue")
 			b.pendingQueue <- op
-		default:
+			//default:
 		}
 	}
 }
