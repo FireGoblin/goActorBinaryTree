@@ -9,6 +9,7 @@ import (
 )
 
 type TestProbe struct {
+	opChan     chan Operation
 	childReply chan OperationReply
 
 	tree *BinaryTreeSet
@@ -20,32 +21,37 @@ type TestProbe struct {
 	currentId int
 
 	rng *rand.Rand
+
+	replyCount int
 }
 
 func (t *TestProbe) displayUnreceived() {
 	t.finishedResponses.displayUnreceived()
 }
 
-func (t *TestProbe) Run(succeed chan bool, fail chan bool) {
+func (t *TestProbe) Run(succeed chan int, fail chan int) {
 	for {
 		select {
 		case msg := <-t.childReply:
 			//fmt.Println(msg)
+			t.replyCount++
 			if !t.checkReply(msg) {
-				fail <- true
+				fail <- t.replyCount
 				fmt.Println("failed in checkReply")
 				return
 			}
+		case op := <-t.opChan:
+			t.sendOperation(op)
 		case <-time.After(1 * time.Second):
 			fmt.Println("checking all replies received")
 			if !t.checkReceviedAllResponses() {
 				fmt.Println("not all responses found")
 				t.displayUnreceived()
-				fail <- true
+				fail <- t.replyCount
 				return
 			} else {
 				fmt.Println("all responses received")
-				succeed <- true
+				succeed <- t.replyCount
 				return
 			}
 		}
@@ -53,7 +59,7 @@ func (t *TestProbe) Run(succeed chan bool, fail chan bool) {
 }
 
 func makeTestProbe() *TestProbe {
-	x := TestProbe{make(chan OperationReply, 1024), makeBinaryTreeSet(), make(map[int]bool), make(map[int]bool), ReplyTracker{make(map[int]bool), &sync.Mutex{}}, 1, rand.New(rand.NewSource(777))}
+	x := TestProbe{make(chan Operation, 1024), make(chan OperationReply, 1024), makeBinaryTreeSet(), make(map[int]bool), make(map[int]bool), ReplyTracker{make(map[int]bool), &sync.Mutex{}}, 1, rand.New(rand.NewSource(777)), 0}
 	return &x
 }
 
@@ -80,6 +86,10 @@ func (t *TestProbe) sendOperation(o Operation) error {
 	t.childChan() <- o
 
 	return nil
+}
+
+func (t *TestProbe) injectOperation(o Operation) {
+	t.opChan <- o
 }
 
 func (t *TestProbe) sendGC() {

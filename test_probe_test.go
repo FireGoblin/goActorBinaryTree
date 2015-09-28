@@ -128,24 +128,19 @@ func TestWorkWithGC(t *testing.T) {
 	fmt.Println("--------------------------")
 	testProbe := makeTestProbe()
 
-	succeed := make(chan bool)
-	fail := make(chan bool)
+	succeed := make(chan int)
+	fail := make(chan int)
 
 	go testProbe.Run(succeed, fail)
 
 	count := 1000
-
-	//display := true
 
 	start := time.Now()
 
 	for i := 0; i < count; i++ {
 		op := testProbe.randomOperation()
 
-		err := testProbe.sendOperation(op)
-		if err != nil {
-			t.FailNow()
-		}
+		testProbe.injectOperation(op)
 
 		if testProbe.rng.Float32() < 0.01 {
 			testProbe.sendGC()
@@ -160,8 +155,13 @@ func TestWorkWithGC(t *testing.T) {
 	start = time.Now()
 
 	select {
-	case <-succeed:
-	case <-fail:
+	case c := <-succeed:
+		fmt.Println(c)
+		if c != count {
+			t.FailNow()
+		}
+	case c := <-fail:
+		fmt.Println(c)
 		t.FailNow()
 	}
 
