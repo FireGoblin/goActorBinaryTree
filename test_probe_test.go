@@ -133,7 +133,7 @@ func TestWorkWithGC(t *testing.T) {
 
 	go testProbe.Run(succeed, fail)
 
-	count := 1000
+	count := 500000
 
 	start := time.Now()
 
@@ -143,7 +143,7 @@ func TestWorkWithGC(t *testing.T) {
 		testProbe.injectOperation(op)
 
 		if testProbe.rng.Float32() < 0.01 {
-			testProbe.sendGC()
+			testProbe.injectGC()
 		}
 	}
 

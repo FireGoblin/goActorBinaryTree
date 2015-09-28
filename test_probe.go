@@ -79,6 +79,7 @@ func (t *TestProbe) sendOperation(o Operation) error {
 	case Contains:
 		t.expectedResponses[o.Id()] = t.currentTree[o.Elem()]
 		t.finishedResponses.sentOp(o)
+	case GC:
 	default:
 		return fmt.Errorf("unknown operation found in test probe")
 	}
@@ -92,8 +93,8 @@ func (t *TestProbe) injectOperation(o Operation) {
 	t.opChan <- o
 }
 
-func (t *TestProbe) sendGC() {
-	t.childChan() <- GC{}
+func (t *TestProbe) injectGC() {
+	t.opChan <- GC{}
 }
 
 func (t *TestProbe) checkReply(o OperationReply) bool {
@@ -104,6 +105,7 @@ func (t *TestProbe) checkReply(o OperationReply) bool {
 			t.finishedResponses.receivedReply(o)
 			return true
 		} else {
+			fmt.Println("failing reply", o)
 			return false
 		}
 	case ContainsResult:
@@ -112,6 +114,7 @@ func (t *TestProbe) checkReply(o OperationReply) bool {
 			t.finishedResponses.receivedReply(c)
 			return true
 		} else {
+			fmt.Println("failing reply", o)
 			return false
 		}
 	default:

@@ -63,7 +63,6 @@ func (b *BinaryTreeNode) Run() {
 				b.right = nil
 				return
 			}
-			//default:
 		}
 	}
 }
