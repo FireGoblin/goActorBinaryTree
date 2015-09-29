@@ -24,22 +24,18 @@ func (i GetElems) RequesterChan() chan OperationReply {
 }
 
 func (i GetElems) Perform(node *BinaryTreeNode) {
-	//fmt.Println("performing getelems")
 	node.getElemResponse = OperationFinished{i.Id()}
 	if node.left != nil {
-		//fmt.Println("send to left")
 		op := GetElems{math.MinInt32, i.requesterChan}
 		node.gcOperationResponses.sentOp(op)
 		node.leftChan() <- op
 	}
 	if node.right != nil {
-		//fmt.Println("send to right")
 		op := GetElems{math.MaxInt32, i.requesterChan}
 		node.gcOperationResponses.sentOp(op)
 		node.rightChan() <- op
 	}
 	if !node.removed {
-		//fmt.Println("send copyInsert")
 		op := CopyInsert{node.elem, node.elem, node.childReply}
 		node.gcOperationResponses.sentOp(op)
 		i.requesterChan <- op
@@ -48,7 +44,6 @@ func (i GetElems) Perform(node *BinaryTreeNode) {
 	if node.gcOperationResponses.checkAllReceived() {
 		node.parent <- node.getElemResponse
 	}
-	//fmt.Println("done getelems")
 }
 
 func (i GetElems) String() string {
