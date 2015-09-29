@@ -33,7 +33,6 @@ func (t *TestProbe) Run(succeed chan int, fail chan int) {
 	for {
 		select {
 		case msg := <-t.childReply:
-			//fmt.Println(msg)
 			t.replyCount++
 			if !t.checkReply(msg) {
 				fail <- t.replyCount
@@ -59,7 +58,7 @@ func (t *TestProbe) Run(succeed chan int, fail chan int) {
 }
 
 func makeTestProbe() *TestProbe {
-	x := TestProbe{make(chan Operation, 1024), make(chan OperationReply, 1024), makeBinaryTreeSet(), make(map[int]bool), make(map[int]bool), ReplyTracker{make(map[int]bool), &sync.Mutex{}}, 1, rand.New(rand.NewSource(777)), 0}
+	x := TestProbe{make(chan Operation, 1024), make(chan OperationReply, 1024), MakeBinaryTreeSet(), make(map[int]bool), make(map[int]bool), ReplyTracker{make(map[int]bool), &sync.Mutex{}}, 1, rand.New(rand.NewSource(777)), 0}
 	return &x
 }
 
@@ -68,7 +67,6 @@ func (t *TestProbe) childChan() chan Operation {
 }
 
 func (t *TestProbe) sendOperation(o Operation) error {
-	//fmt.Println(o)
 	switch o.(type) {
 	case Insert:
 		t.currentTree[o.Elem()] = true
@@ -98,7 +96,6 @@ func (t *TestProbe) injectGC() {
 }
 
 func (t *TestProbe) checkReply(o OperationReply) bool {
-	//fmt.Println(o)
 	switch o.(type) {
 	case OperationFinished:
 		if t.finishedResponses.get(o.Id()) {

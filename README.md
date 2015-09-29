@@ -4,6 +4,11 @@ The aim is to implement an actor based binary tree based on an assignment from P
 on Coursera which was a course on Scala.  In the original assignment used the pattern matching in Scala for making
 it easier to handle the operations and operationReplys, and used the akka Actor system.
 
+The structure is a binary tree.  Each node contains an element integer and a boolean representing whether that element
+has been removed.  Instead of actually removing a node, we simply flip the removed variable in it to true.  GCing 
+involves copying all non-removed nodes to a new tree and then freeing up the old nodes, thus elimination all
+removed nodes (besides the root 0 node which may or may not be removed).  
+
 Porting from scala
 
 The interfaces Operation and OperationReply were originally traits in the scala code.  Perform() was the new function
@@ -11,7 +16,7 @@ for the golang implementation of Operations.  In Scala used its pattern matching
 BinaryTreeSet and BinaryTreeNode that had what to do with every Operation and Reply.  This could be done in golang, 
 but it seemed better to have the function for performing the operation actually in the file with the operation than
 forcing binaryTreeNode to contain the code for every operation in it.  It also makes for much smaller and more 
-manageable Run commands for nodes.
+manageable Run commands for nodes, and allows for the addition of new operations without changing Run() commands.
 
 Random finding
 
@@ -24,6 +29,12 @@ Dealing with race conditions
 There were two race conditions ran into.  One of them lead to adding the mutex to reply_tracker to coordinate map accesses.
 The other lead to using injectOperation() in tests instead of sendOperation() so all actions performed by the testProbe
 go through the Run() routine instead of concurrently to it.
+
+TODO
+
+For the binary_tree_set to be usable as a data type in another project need to move some of the test_probe code into the
+binary_tree_set to give it a convenient public api instead of making them form operations and send them correctly like
+test_probe.
 
 //-------------------------------
 

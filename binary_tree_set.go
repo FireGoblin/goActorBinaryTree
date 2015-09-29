@@ -1,9 +1,6 @@
 package ActorBinaryTree
 
-import (
-	//"fmt"
-	"math"
-)
+import "math"
 
 //max two children
 type BinaryTreeSet struct {
@@ -14,6 +11,8 @@ type BinaryTreeSet struct {
 	transferRoot *BinaryTreeNode
 
 	currentId int
+
+	done chan bool
 }
 
 func (b *BinaryTreeSet) rootChan() chan Operation {
@@ -32,22 +31,28 @@ func (b *BinaryTreeSet) transferRootChan() chan Operation {
 	return b.transferRoot.opChan
 }
 
-func makeBinaryTreeSet() *BinaryTreeSet {
-	x := BinaryTreeSet{make(chan Operation, 1024), make(chan OperationReply, 32), makeBinaryTreeNode(0, true), nil, -1}
+func MakeBinaryTreeSet() *BinaryTreeSet {
+	x := BinaryTreeSet{make(chan Operation, 1024), make(chan OperationReply, 32), makeBinaryTreeNode(0, true), nil, -1, make(chan bool, 1)}
 	x.root.parent = x.childReply
 	go x.Run()
 	return &x
 }
 
+//non-blocking
+func (b *BinaryTreeSet) Close() {
+	b.done <- true
+}
+
 func (b *BinaryTreeSet) Run() {
 	for {
 		select {
+		case <-b.done:
+			return
 		case op := <-b.opChan:
 			_, ok := op.(GC)
 			if ok {
 				b.transferRoot = makeBinaryTreeNode(0, true)
 				b.transferRoot.parent = b.childReply
-				//fmt.Println("moving to GC")
 				b.runGC()
 			} else {
 				b.rootChan() <- op
@@ -63,7 +68,6 @@ func (b *BinaryTreeSet) runGC() {
 	for {
 		select {
 		case opRep := <-b.childReply:
-			//fmt.Println("opRep received:", opRep)
 			switch opRep.(type) {
 			case OperationFinished:
 				if opRep.Id() == b.currentId {
@@ -71,7 +75,6 @@ func (b *BinaryTreeSet) runGC() {
 					if b.currentId == math.MinInt32 {
 						b.currentId = -1
 					}
-					//fmt.Println("GC Over")
 					b.root = b.transferRoot
 					b.transferRoot = nil
 					return
