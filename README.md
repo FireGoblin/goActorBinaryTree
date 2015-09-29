@@ -1,3 +1,32 @@
+Goal
+
+The aim is to implement an actor based binary tree based on an assignment from Principles of Reactive Programming
+on Coursera which was a course on Scala.  In the original assignment used the pattern matching in Scala for making
+it easier to handle the operations and operationReplys, and used the akka Actor system.
+
+Porting from scala
+
+The interfaces Operation and OperationReply were originally traits in the scala code.  Perform() was the new function
+for the golang implementation of Operations.  In Scala used its pattern matching to have a large match statement in
+BinaryTreeSet and BinaryTreeNode that had what to do with every Operation and Reply.  This could be done in golang, 
+but it seemed better to have the function for performing the operation actually in the file with the operation than
+forcing binaryTreeNode to contain the code for every operation in it.  It also makes for much smaller and more 
+manageable Run commands for nodes.
+
+Random finding
+
+When I originally made the run routines I included a default: case in them.  This was a big mistake as it caused an
+enormous performance issue that made it take seconds to perform trivial tasks.  Not only is it unnecessary in a loop
+where it can't do anything until receives something on a channel, but apparently it causes enormous performance issues.
+
+Dealing with race conditions
+
+There were two race conditions ran into.  One of them lead to adding the mutex to reply_tracker to coordinate map accesses.
+The other lead to using injectOperation() in tests instead of sendOperation() so all actions performed by the testProbe
+go through the Run() routine instead of concurrently to it.
+
+//-------------------------------
+
 PACKAGE DOCUMENTATION
 
 package ActorBinaryTree

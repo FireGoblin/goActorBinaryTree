@@ -54,8 +54,6 @@ func (b *BinaryTreeNode) Run() {
 		case op := <-b.opChan:
 			op.Perform(b)
 		case opRep := <-b.childReply:
-			//fmt.Println(b)
-			//fmt.Println(opRep)
 			b.gcOperationResponses.receivedReply(opRep)
 			if b.gcOperationResponses.checkAllReceived() {
 				b.parent <- b.getElemResponse
