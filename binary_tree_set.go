@@ -33,7 +33,7 @@ func (b *BinaryTreeSet) transferRootChan() chan operation {
 
 // MakeBinaryTreeSet is the function to create a new BinaryTreeSet
 func MakeBinaryTreeSet() *BinaryTreeSet {
-	x := BinaryTreeSet{make(chan operation, 1024), make(chan operationReply, 32), makeBinaryTreeNode(0, true), nil, -1, make(chan bool, 1)}
+	x := BinaryTreeSet{make(chan operation), make(chan operationReply), makeBinaryTreeNode(0, true), nil, -1, make(chan bool)}
 	x.root.parent = x.childReply
 	go x.run()
 	return &x
