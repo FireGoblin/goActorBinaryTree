@@ -39,6 +39,6 @@ func (r remove) Perform(node *binaryTreeNode) {
 	}
 }
 
-func (i remove) String() string {
-	return fmt.Sprintf("remove(id: %d, elem: %d)", i.id, i.elem)
+func (r remove) String() string {
+	return fmt.Sprintf("remove(id: %d, elem: %d)", r.id, r.elem)
 }

@@ -2,7 +2,7 @@ package ActorBinaryTree
 
 import "math"
 
-//BinaryTreeSet
+// BinaryTreeSet
 type BinaryTreeSet struct {
 	opChan     chan operation
 	childReply chan operationReply
@@ -32,18 +32,18 @@ func (b *BinaryTreeSet) transferRootChan() chan operation {
 }
 
 func MakeBinaryTreeSet() *BinaryTreeSet {
-	x := BinaryTreeSet{make(chan operation, 1024), make(chan operationReply, 32), makebinaryTreeNode(0, true), nil, -1, make(chan bool, 1)}
+	x := BinaryTreeSet{make(chan operation, 1024), make(chan operationReply, 32), makeBinaryTreeNode(0, true), nil, -1, make(chan bool, 1)}
 	x.root.parent = x.childReply
-	go x.Run()
+	go x.run()
 	return &x
 }
 
-//non-blocking
+// Close in a non-blocking manner
 func (b *BinaryTreeSet) Close() {
 	b.done <- true
 }
 
-func (b *BinaryTreeSet) Run() {
+func (b *BinaryTreeSet) run() {
 	for {
 		select {
 		case <-b.done:
@@ -51,7 +51,7 @@ func (b *BinaryTreeSet) Run() {
 		case op := <-b.opChan:
 			_, ok := op.(gc)
 			if ok {
-				b.transferRoot = makebinaryTreeNode(0, true)
+				b.transferRoot = makeBinaryTreeNode(0, true)
 				b.transferRoot.parent = b.childReply
 				b.rungc()
 			} else {

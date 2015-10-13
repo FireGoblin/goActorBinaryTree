@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type TestProbe struct {
+type testProbe struct {
 	opChan     chan operation
 	childReply chan operationReply
 
@@ -16,7 +16,7 @@ type TestProbe struct {
 
 	currentTree       map[int]bool //track what has been inserted
 	expectedResponses map[int]bool //track expected responses to contains requests
-	finishedResponses ReplyTracker
+	finishedResponses replyTracker
 
 	currentID int
 
@@ -25,11 +25,11 @@ type TestProbe struct {
 	replyCount int
 }
 
-func (t *TestProbe) displayUnreceived() {
+func (t *testProbe) displayUnreceived() {
 	t.finishedResponses.displayUnreceived()
 }
 
-func (t *TestProbe) Run(succeed chan int, fail chan int) {
+func (t *testProbe) run(succeed chan int, fail chan int) {
 	for {
 		select {
 		case msg := <-t.childReply:
@@ -57,16 +57,16 @@ func (t *TestProbe) Run(succeed chan int, fail chan int) {
 	}
 }
 
-func makeTestProbe() *TestProbe {
-	x := TestProbe{make(chan operation, 1024), make(chan operationReply, 1024), MakeBinaryTreeSet(), make(map[int]bool), make(map[int]bool), ReplyTracker{make(map[int]bool), &sync.Mutex{}}, 1, rand.New(rand.NewSource(777)), 0}
+func maketestProbe() *testProbe {
+	x := testProbe{make(chan operation, 1024), make(chan operationReply, 1024), MakeBinaryTreeSet(), make(map[int]bool), make(map[int]bool), replyTracker{make(map[int]bool), &sync.Mutex{}}, 1, rand.New(rand.NewSource(777)), 0}
 	return &x
 }
 
-func (t *TestProbe) childChan() chan operation {
+func (t *testProbe) childChan() chan operation {
 	return t.tree.opChan
 }
 
-func (t *TestProbe) sendoperation(o operation) error {
+func (t *testProbe) sendoperation(o operation) error {
 	switch o.(type) {
 	case insert:
 		t.currentTree[o.Elem()] = true
@@ -87,15 +87,15 @@ func (t *TestProbe) sendoperation(o operation) error {
 	return nil
 }
 
-func (t *TestProbe) injectoperation(o operation) {
+func (t *testProbe) injectoperation(o operation) {
 	t.opChan <- o
 }
 
-func (t *TestProbe) injectgc() {
+func (t *testProbe) injectgc() {
 	t.opChan <- gc{}
 }
 
-func (t *TestProbe) checkReply(o operationReply) bool {
+func (t *testProbe) checkReply(o operationReply) bool {
 	switch o.(type) {
 	case operationFinished:
 		if t.finishedResponses.get(o.ID()) {
@@ -119,41 +119,41 @@ func (t *TestProbe) checkReply(o operationReply) bool {
 	}
 }
 
-func (t *TestProbe) checkReceviedAllResponses() bool {
+func (t *testProbe) checkReceviedAllResponses() bool {
 	return t.finishedResponses.checkAllReceived()
 }
 
-func (t *TestProbe) incrementID() {
+func (t *testProbe) incrementID() {
 	t.currentID++
 	if t.currentID == math.MaxInt32 {
 		t.currentID = 1
 	}
 }
 
-func (t *TestProbe) makeinsert(e int) insert {
+func (t *testProbe) makeinsert(e int) insert {
 	i := t.currentID
 	t.incrementID()
 	return insert{i, e, t.childReply}
 }
 
-func (t *TestProbe) makecontains(e int) contains {
+func (t *testProbe) makecontains(e int) contains {
 	i := t.currentID
 	t.incrementID()
 	return contains{i, e, t.childReply}
 }
 
-func (t *TestProbe) makeremove(e int) remove {
+func (t *testProbe) makeremove(e int) remove {
 	i := t.currentID
 	t.incrementID()
 	return remove{i, e, t.childReply}
 }
 
-func (t *TestProbe) coinFlip() bool {
+func (t *testProbe) coinFlip() bool {
 	return t.rng.Int()%2 == 0
 }
 
 // random element between (MinInt8, MaxInt8) (exclusive)
-func (t *TestProbe) randomElement8() int {
+func (t *testProbe) randomElement8() int {
 	flip := t.coinFlip()
 	val := t.rng.Int31n(math.MaxInt8)
 
@@ -169,7 +169,7 @@ func (t *TestProbe) randomElement8() int {
 }
 
 // random element between (MinInt16, MaxInt16) (exclusive)
-func (t *TestProbe) randomElement16() int {
+func (t *testProbe) randomElement16() int {
 	flip := t.coinFlip()
 	val := t.rng.Int31n(math.MaxInt16)
 
@@ -185,7 +185,7 @@ func (t *TestProbe) randomElement16() int {
 }
 
 // random element between (MinInt32, MaxInt32) (exclusive)
-func (t *TestProbe) randomElement32() int {
+func (t *testProbe) randomElement32() int {
 	flip := t.coinFlip()
 	val := t.rng.Int31n(math.MaxInt32)
 
@@ -200,7 +200,7 @@ func (t *TestProbe) randomElement32() int {
 	return int(val)
 }
 
-func (t *TestProbe) randomoperation() operation {
+func (t *testProbe) randomoperation() operation {
 	val := t.rng.Int31n(4)
 
 	switch val {

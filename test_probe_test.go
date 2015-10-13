@@ -7,7 +7,7 @@ import (
 )
 
 func TestinsertsAndcontains(t *testing.T) {
-	testProbe := makeTestProbe()
+	testProbe := maketestProbe()
 
 	one := testProbe.makecontains(1)
 	testProbe.sendoperation(one)
@@ -53,12 +53,12 @@ func TestinsertsAndcontains(t *testing.T) {
 
 func TestInstructionExample(t *testing.T) {
 	fmt.Println("--------------------------")
-	testProbe := makeTestProbe()
+	testProbe := maketestProbe()
 
 	succeed := make(chan int)
 	fail := make(chan int)
 
-	go testProbe.Run(succeed, fail)
+	go testProbe.run(succeed, fail)
 
 	var ops []operation
 	ops = append(ops, testProbe.makeinsert(1))
@@ -82,12 +82,12 @@ func TestInstructionExample(t *testing.T) {
 
 func TestSmallgc(t *testing.T) {
 	fmt.Println("--------------------------")
-	testProbe := makeTestProbe()
+	testProbe := maketestProbe()
 
 	succeed := make(chan int)
 	fail := make(chan int)
 
-	go testProbe.Run(succeed, fail)
+	go testProbe.run(succeed, fail)
 
 	var opsBefore []operation
 	var opsAfter []operation
@@ -126,12 +126,12 @@ func TestSmallgc(t *testing.T) {
 
 func TestWorkWithgc(t *testing.T) {
 	fmt.Println("--------------------------")
-	testProbe := makeTestProbe()
+	testProbe := maketestProbe()
 
 	succeed := make(chan int)
 	fail := make(chan int)
 
-	go testProbe.Run(succeed, fail)
+	go testProbe.run(succeed, fail)
 
 	count := 100000
 

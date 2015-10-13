@@ -16,7 +16,7 @@ type binaryTreeNode struct {
 	removed bool
 
 	//elements for tracking gc
-	gcoperationResponses ReplyTracker
+	gcoperationResponses replyTracker
 	getElemResponse      operationFinished
 }
 
@@ -40,9 +40,9 @@ func (b *binaryTreeNode) rightChan() chan operation {
 	return b.right.opChan
 }
 
-func makebinaryTreeNode(element int, initiallyremoved bool) *binaryTreeNode {
+func makeBinaryTreeNode(element int, initiallyremoved bool) *binaryTreeNode {
 	//TODO: Tweak buffer sizes
-	x := binaryTreeNode{nil, make(chan operation, 1024), make(chan operationReply, 32), nil, nil, element, initiallyremoved, ReplyTracker{make(map[int]bool), &sync.Mutex{}}, operationFinished{0}}
+	x := binaryTreeNode{nil, make(chan operation, 1024), make(chan operationReply, 32), nil, nil, element, initiallyremoved, replyTracker{make(map[int]bool), &sync.Mutex{}}, operationFinished{0}}
 	go x.Run()
 	return &x
 }

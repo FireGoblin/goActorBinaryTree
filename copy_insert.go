@@ -28,7 +28,7 @@ func (i copyInsert) Perform(node *binaryTreeNode) {
 		if node.left != nil {
 			node.leftChan() <- i
 		} else {
-			node.left = makebinaryTreeNode(i.elem, false)
+			node.left = makeBinaryTreeNode(i.elem, false)
 			node.left.parent = node.childReply
 			i.requesterChan <- operationFinished{i.id}
 		}
@@ -36,7 +36,7 @@ func (i copyInsert) Perform(node *binaryTreeNode) {
 		if node.right != nil {
 			node.rightChan() <- i
 		} else {
-			node.right = makebinaryTreeNode(i.elem, false)
+			node.right = makeBinaryTreeNode(i.elem, false)
 			node.right.parent = node.childReply
 			i.requesterChan <- operationFinished{i.id}
 		}

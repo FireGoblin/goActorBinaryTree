@@ -3,18 +3,18 @@ package ActorBinaryTree
 import "fmt"
 import "sync"
 
-type ReplyTracker struct {
+type replyTracker struct {
 	m   map[int]bool
 	key *sync.Mutex
 }
 
-func (r ReplyTracker) sentOp(o operation) {
+func (r replyTracker) sentOp(o operation) {
 	r.key.Lock()
 	r.m[o.ID()] = true
 	r.key.Unlock()
 }
 
-func (r ReplyTracker) receivedReply(o operationReply) error {
+func (r replyTracker) receivedReply(o operationReply) error {
 	r.key.Lock()
 	if !r.m[o.ID()] {
 		r.key.Unlock()
@@ -27,7 +27,7 @@ func (r ReplyTracker) receivedReply(o operationReply) error {
 	return nil
 }
 
-func (r ReplyTracker) get(i int) bool {
+func (r replyTracker) get(i int) bool {
 	r.key.Lock()
 	x := r.m[i]
 	r.key.Unlock()
@@ -35,7 +35,7 @@ func (r ReplyTracker) get(i int) bool {
 	return x
 }
 
-func (r ReplyTracker) checkAllReceived() bool {
+func (r replyTracker) checkAllReceived() bool {
 	r.key.Lock()
 	for _, v := range r.m {
 		if v {
@@ -48,7 +48,7 @@ func (r ReplyTracker) checkAllReceived() bool {
 	return true
 }
 
-func (r ReplyTracker) displayUnreceived() {
+func (r replyTracker) displayUnreceived() {
 	r.key.Lock()
 	for k, v := range r.m {
 		if v {

@@ -175,12 +175,12 @@ func (r remove) RequesterChan() chan operationReply
 
 func (i remove) String() string
 
-type ReplyTracker struct {
+type replyTracker struct {
     // contains filtered or unexported fields
 }
 
-type TestProbe struct {
+type testProbe struct {
     // contains filtered or unexported fields
 }
 
-func (t *TestProbe) Run(succeed chan int, fail chan int)
+func (t *testProbe) Run(succeed chan int, fail chan int)
