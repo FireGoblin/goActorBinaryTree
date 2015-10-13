@@ -2,14 +2,14 @@ package ActorBinaryTree
 
 import "fmt"
 
-type OperationFinished struct {
+type operationFinished struct {
 	id int
 }
 
-func (o OperationFinished) Id() int {
+func (o operationFinished) ID() int {
 	return o.id
 }
 
-func (o OperationFinished) String() string {
-	return fmt.Sprintf("OperationFinished(id: %d)", o.id)
+func (o operationFinished) String() string {
+	return fmt.Sprintf("operationFinished(id: %d)", o.id)
 }

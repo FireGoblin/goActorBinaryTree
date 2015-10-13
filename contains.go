@@ -2,42 +2,42 @@ package ActorBinaryTree
 
 import "fmt"
 
-type Contains struct {
+type contains struct {
 	id            int
 	elem          int
 	requesterChan chan OperationReply
 }
 
-func (c Contains) Id() int {
+func (c contains) ID() int {
 	return c.id
 }
 
-func (c Contains) Elem() int {
+func (c contains) Elem() int {
 	return c.elem
 }
 
-func (c Contains) RequesterChan() chan OperationReply {
+func (c contains) RequesterChan() chan OperationReply {
 	return c.requesterChan
 }
 
-func (c Contains) Perform(node *BinaryTreeNode) {
+func (c contains) Perform(node *binaryTreeNode) {
 	if c.elem == node.elem {
-		c.requesterChan <- ContainsResult{c.id, !node.removed}
+		c.requesterChan <- containsResult{c.id, !node.removed}
 	} else if c.elem < node.elem {
 		if node.left != nil {
 			node.leftChan() <- c
 		} else {
-			c.requesterChan <- ContainsResult{c.id, false}
+			c.requesterChan <- containsResult{c.id, false}
 		}
 	} else {
 		if node.right != nil {
 			node.rightChan() <- c
 		} else {
-			c.requesterChan <- ContainsResult{c.id, false}
+			c.requesterChan <- containsResult{c.id, false}
 		}
 	}
 }
 
-func (i Contains) String() string {
-	return fmt.Sprintf("Contains(id: %d, elem: %d)", i.id, i.elem)
+func (i contains) String() string {
+	return fmt.Sprintf("contains(id: %d, elem: %d)", i.id, i.elem)
 }

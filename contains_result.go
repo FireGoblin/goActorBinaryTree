@@ -2,19 +2,19 @@ package ActorBinaryTree
 
 import "fmt"
 
-type ContainsResult struct {
+type containsResult struct {
 	id     int
 	result bool
 }
 
-func (c ContainsResult) Id() int {
+func (c containsResult) ID() int {
 	return c.id
 }
 
-func (c ContainsResult) Result() bool {
+func (c containsResult) Result() bool {
 	return c.result
 }
 
-func (c ContainsResult) String() string {
-	return fmt.Sprintf("ContainsResult(id: %d, result: %t)", c.id, c.result)
+func (c containsResult) String() string {
+	return fmt.Sprintf("containsResult(id: %d, result: %t)", c.id, c.result)
 }

@@ -2,43 +2,43 @@ package ActorBinaryTree
 
 import "fmt"
 
-type Remove struct {
+type remove struct {
 	id            int
 	elem          int
 	requesterChan chan OperationReply
 }
 
-func (r Remove) Id() int {
+func (r remove) ID() int {
 	return r.id
 }
 
-func (r Remove) Elem() int {
+func (r remove) Elem() int {
 	return r.elem
 }
 
-func (r Remove) RequesterChan() chan OperationReply {
+func (r remove) RequesterChan() chan OperationReply {
 	return r.requesterChan
 }
 
-func (r Remove) Perform(node *BinaryTreeNode) {
+func (r remove) Perform(node *binaryTreeNode) {
 	if r.elem == node.elem {
 		node.removed = true
-		r.requesterChan <- OperationFinished{r.id}
+		r.requesterChan <- operationFinished{r.id}
 	} else if r.elem < node.elem {
 		if node.left != nil {
 			node.leftChan() <- r
 		} else {
-			r.requesterChan <- OperationFinished{r.id}
+			r.requesterChan <- operationFinished{r.id}
 		}
 	} else if r.elem > node.elem {
 		if node.right != nil {
 			node.rightChan() <- r
 		} else {
-			r.requesterChan <- OperationFinished{r.id}
+			r.requesterChan <- operationFinished{r.id}
 		}
 	}
 }
 
-func (i Remove) String() string {
-	return fmt.Sprintf("Remove(id: %d, elem: %d)", i.id, i.elem)
+func (i remove) String() string {
+	return fmt.Sprintf("remove(id: %d, elem: %d)", i.id, i.elem)
 }

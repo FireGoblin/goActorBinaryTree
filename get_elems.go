@@ -5,38 +5,38 @@ import (
 	"math"
 )
 
-type GetElems struct {
+type getElems struct {
 	id int
 	//elem          int
 	requesterChan chan OperationReply
 }
 
-func (i GetElems) Id() int {
+func (i getElems) ID() int {
 	return i.id
 }
 
-func (i GetElems) Elem() int {
+func (i getElems) Elem() int {
 	return 0
 }
 
-func (i GetElems) RequesterChan() chan OperationReply {
+func (i getElems) RequesterChan() chan OperationReply {
 	return i.requesterChan
 }
 
-func (i GetElems) Perform(node *BinaryTreeNode) {
-	node.getElemResponse = OperationFinished{i.Id()}
+func (i getElems) Perform(node *binaryTreeNode) {
+	node.getElemResponse = operationFinished{i.ID()}
 	if node.left != nil {
-		op := GetElems{math.MinInt32, i.requesterChan}
+		op := getElems{math.MinInt32, i.requesterChan}
 		node.gcOperationResponses.sentOp(op)
 		node.leftChan() <- op
 	}
 	if node.right != nil {
-		op := GetElems{math.MaxInt32, i.requesterChan}
+		op := getElems{math.MaxInt32, i.requesterChan}
 		node.gcOperationResponses.sentOp(op)
 		node.rightChan() <- op
 	}
 	if !node.removed {
-		op := CopyInsert{node.elem, node.elem, node.childReply}
+		op := Copyinsert{node.elem, node.elem, node.childReply}
 		node.gcOperationResponses.sentOp(op)
 		i.requesterChan <- op
 	}
@@ -46,6 +46,6 @@ func (i GetElems) Perform(node *BinaryTreeNode) {
 	}
 }
 
-func (i GetElems) String() string {
-	return fmt.Sprintf("GetElems(id: %d)", i.id)
+func (i getElems) String() string {
+	return fmt.Sprintf("getElems(id: %d)", i.id)
 }

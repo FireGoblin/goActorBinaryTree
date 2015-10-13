@@ -18,7 +18,7 @@ type TestProbe struct {
 	expectedResponses map[int]bool //track expected responses to contains requests
 	finishedResponses ReplyTracker
 
-	currentId int
+	currentID int
 
 	rng *rand.Rand
 
@@ -68,16 +68,16 @@ func (t *TestProbe) childChan() chan Operation {
 
 func (t *TestProbe) sendOperation(o Operation) error {
 	switch o.(type) {
-	case Insert:
+	case insert:
 		t.currentTree[o.Elem()] = true
 		t.finishedResponses.sentOp(o)
-	case Remove:
+	case remove:
 		t.currentTree[o.Elem()] = false
 		t.finishedResponses.sentOp(o)
-	case Contains:
-		t.expectedResponses[o.Id()] = t.currentTree[o.Elem()]
+	case contains:
+		t.expectedResponses[o.ID()] = t.currentTree[o.Elem()]
 		t.finishedResponses.sentOp(o)
-	case GC:
+	case gc:
 	default:
 		return fmt.Errorf("unknown operation found in test probe")
 	}
@@ -91,23 +91,23 @@ func (t *TestProbe) injectOperation(o Operation) {
 	t.opChan <- o
 }
 
-func (t *TestProbe) injectGC() {
-	t.opChan <- GC{}
+func (t *TestProbe) injectgc() {
+	t.opChan <- gc{}
 }
 
 func (t *TestProbe) checkReply(o OperationReply) bool {
 	switch o.(type) {
-	case OperationFinished:
-		if t.finishedResponses.get(o.Id()) {
+	case operationFinished:
+		if t.finishedResponses.get(o.ID()) {
 			t.finishedResponses.receivedReply(o)
 			return true
 		} else {
 			fmt.Println("failing reply", o)
 			return false
 		}
-	case ContainsResult:
-		c := o.(ContainsResult)
-		if t.finishedResponses.get(c.Id()) && t.expectedResponses[c.Id()] == c.Result() {
+	case containsResult:
+		c := o.(containsResult)
+		if t.finishedResponses.get(c.ID()) && t.expectedResponses[c.ID()] == c.Result() {
 			t.finishedResponses.receivedReply(c)
 			return true
 		} else {
@@ -123,29 +123,29 @@ func (t *TestProbe) checkReceviedAllResponses() bool {
 	return t.finishedResponses.checkAllReceived()
 }
 
-func (t *TestProbe) incrementId() {
-	t.currentId++
-	if t.currentId == math.MaxInt32 {
-		t.currentId = 1
+func (t *TestProbe) incrementID() {
+	t.currentID++
+	if t.currentID == math.MaxInt32 {
+		t.currentID = 1
 	}
 }
 
-func (t *TestProbe) makeInsert(e int) Insert {
-	i := t.currentId
-	t.incrementId()
-	return Insert{i, e, t.childReply}
+func (t *TestProbe) makeinsert(e int) insert {
+	i := t.currentID
+	t.incrementID()
+	return insert{i, e, t.childReply}
 }
 
-func (t *TestProbe) makeContains(e int) Contains {
-	i := t.currentId
-	t.incrementId()
-	return Contains{i, e, t.childReply}
+func (t *TestProbe) makecontains(e int) contains {
+	i := t.currentID
+	t.incrementID()
+	return contains{i, e, t.childReply}
 }
 
-func (t *TestProbe) makeRemove(e int) Remove {
-	i := t.currentId
-	t.incrementId()
-	return Remove{i, e, t.childReply}
+func (t *TestProbe) makeremove(e int) remove {
+	i := t.currentID
+	t.incrementID()
+	return remove{i, e, t.childReply}
 }
 
 func (t *TestProbe) coinFlip() bool {
@@ -205,13 +205,13 @@ func (t *TestProbe) randomOperation() Operation {
 
 	switch val {
 	case 0:
-		return t.makeInsert(t.randomElement8())
+		return t.makeinsert(t.randomElement8())
 	case 1:
-		return t.makeInsert(t.randomElement8())
+		return t.makeinsert(t.randomElement8())
 	case 2:
-		return t.makeContains(t.randomElement8())
+		return t.makecontains(t.randomElement8())
 	case 3:
-		return t.makeRemove(t.randomElement8())
+		return t.makeremove(t.randomElement8())
 	}
 
 	return nil

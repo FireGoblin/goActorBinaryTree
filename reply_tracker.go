@@ -10,18 +10,18 @@ type ReplyTracker struct {
 
 func (r ReplyTracker) sentOp(o Operation) {
 	r.key.Lock()
-	r.m[o.Id()] = true
+	r.m[o.ID()] = true
 	r.key.Unlock()
 }
 
 func (r ReplyTracker) receivedReply(o OperationReply) error {
 	r.key.Lock()
-	if !r.m[o.Id()] {
+	if !r.m[o.ID()] {
 		r.key.Unlock()
-		return fmt.Errorf("received reply %d that had not been sent", r.m[o.Id()])
+		return fmt.Errorf("received reply %t that had not been sent", r.m[o.ID()])
 	}
 
-	r.m[o.Id()] = false
+	r.m[o.ID()] = false
 
 	r.key.Unlock()
 	return nil

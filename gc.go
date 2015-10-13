@@ -3,24 +3,24 @@ package ActorBinaryTree
 import "fmt"
 
 //dummy operation
-type GC struct{}
+type gc struct{}
 
-func (g GC) Id() int {
+func (g gc) ID() int {
 	return 0
 }
 
-func (g GC) Elem() int {
+func (g gc) Elem() int {
 	return 0
 }
 
-func (g GC) RequesterChan() chan OperationReply {
+func (g gc) RequesterChan() chan OperationReply {
 	return nil
 }
 
-func (g GC) Perform(node *BinaryTreeNode) {
+func (g gc) Perform(node *binaryTreeNode) {
 	return
 }
 
-func (g GC) String() string {
-	return fmt.Sprintf("GC")
+func (g gc) String() string {
+	return fmt.Sprintf("gc")
 }

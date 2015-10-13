@@ -2,15 +2,15 @@ package ActorBinaryTree
 
 import "math"
 
-//max two children
+//BinaryTreeSet
 type BinaryTreeSet struct {
 	opChan     chan Operation
 	childReply chan OperationReply
 
-	root         *BinaryTreeNode
-	transferRoot *BinaryTreeNode
+	root         *binaryTreeNode
+	transferRoot *binaryTreeNode
 
-	currentId int
+	currentID int
 
 	done chan bool
 }
@@ -32,7 +32,7 @@ func (b *BinaryTreeSet) transferRootChan() chan Operation {
 }
 
 func MakeBinaryTreeSet() *BinaryTreeSet {
-	x := BinaryTreeSet{make(chan Operation, 1024), make(chan OperationReply, 32), makeBinaryTreeNode(0, true), nil, -1, make(chan bool, 1)}
+	x := BinaryTreeSet{make(chan Operation, 1024), make(chan OperationReply, 32), makebinaryTreeNode(0, true), nil, -1, make(chan bool, 1)}
 	x.root.parent = x.childReply
 	go x.Run()
 	return &x
@@ -49,11 +49,11 @@ func (b *BinaryTreeSet) Run() {
 		case <-b.done:
 			return
 		case op := <-b.opChan:
-			_, ok := op.(GC)
+			_, ok := op.(gc)
 			if ok {
-				b.transferRoot = makeBinaryTreeNode(0, true)
+				b.transferRoot = makebinaryTreeNode(0, true)
 				b.transferRoot.parent = b.childReply
-				b.runGC()
+				b.rungc()
 			} else {
 				b.rootChan() <- op
 			}
@@ -63,29 +63,29 @@ func (b *BinaryTreeSet) Run() {
 	}
 }
 
-func (b *BinaryTreeSet) runGC() {
-	b.rootChan() <- GetElems{b.currentId, b.childReply}
+func (b *BinaryTreeSet) rungc() {
+	b.rootChan() <- getElems{b.currentID, b.childReply}
 	for {
 		select {
 		case opRep := <-b.childReply:
 			switch opRep.(type) {
-			case OperationFinished:
-				if opRep.Id() == b.currentId {
-					b.currentId--
-					if b.currentId == math.MinInt32 {
-						b.currentId = -1
+			case operationFinished:
+				if opRep.ID() == b.currentID {
+					b.currentID--
+					if b.currentID == math.MinInt32 {
+						b.currentID = -1
 					}
 					b.root = b.transferRoot
 					b.transferRoot = nil
 					return
 				} else {
-					panic("received bad id for OperationFinished")
+					panic("received bad id for operationFinished")
 				}
-			case CopyInsert:
-				c := opRep.(CopyInsert)
+			case Copyinsert:
+				c := opRep.(Copyinsert)
 				b.transferRootChan() <- c
 			default:
-				panic("should only receive OperationFinished and CopyInsert in childReply at root")
+				panic("should only receive operationFinished and Copyinsert in childReply at root")
 			}
 		}
 	}

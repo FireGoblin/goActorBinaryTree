@@ -3,29 +3,28 @@ package ActorBinaryTree
 import "fmt"
 import "sync"
 
-//max two children
-type BinaryTreeNode struct {
+type binaryTreeNode struct {
 	parent chan OperationReply
 
 	opChan     chan Operation
 	childReply chan OperationReply
 
-	left  *BinaryTreeNode //use left.opChan for sending operations to it
-	right *BinaryTreeNode //use right.opChan for sending operations to it
+	left  *binaryTreeNode //use left.opChan for sending operations to it
+	right *binaryTreeNode //use right.opChan for sending operations to it
 
 	elem    int
 	removed bool
 
 	//elements for tracking gc
 	gcOperationResponses ReplyTracker
-	getElemResponse      OperationFinished
+	getElemResponse      operationFinished
 }
 
-func (b *BinaryTreeNode) String() string {
+func (b *binaryTreeNode) String() string {
 	return fmt.Sprintf("Node(elem: %d, removed: %t)", b.elem, b.removed)
 }
 
-func (b *BinaryTreeNode) leftChan() chan Operation {
+func (b *binaryTreeNode) leftChan() chan Operation {
 	if b.left == nil {
 		return nil
 	}
@@ -33,7 +32,7 @@ func (b *BinaryTreeNode) leftChan() chan Operation {
 	return b.left.opChan
 }
 
-func (b *BinaryTreeNode) rightChan() chan Operation {
+func (b *binaryTreeNode) rightChan() chan Operation {
 	if b.right == nil {
 		return nil
 	}
@@ -41,14 +40,14 @@ func (b *BinaryTreeNode) rightChan() chan Operation {
 	return b.right.opChan
 }
 
-func makeBinaryTreeNode(element int, initiallyRemoved bool) *BinaryTreeNode {
+func makebinaryTreeNode(element int, initiallyremoved bool) *binaryTreeNode {
 	//TODO: Tweak buffer sizes
-	x := BinaryTreeNode{nil, make(chan Operation, 1024), make(chan OperationReply, 32), nil, nil, element, initiallyRemoved, ReplyTracker{make(map[int]bool), &sync.Mutex{}}, OperationFinished{0}}
+	x := binaryTreeNode{nil, make(chan Operation, 1024), make(chan OperationReply, 32), nil, nil, element, initiallyremoved, ReplyTracker{make(map[int]bool), &sync.Mutex{}}, operationFinished{0}}
 	go x.Run()
 	return &x
 }
 
-func (b *BinaryTreeNode) Run() {
+func (b *binaryTreeNode) Run() {
 	for {
 		select {
 		case op := <-b.opChan:

@@ -2,47 +2,47 @@ package ActorBinaryTree
 
 import "fmt"
 
-type CopyInsert struct {
+type Copyinsert struct {
 	id            int
 	elem          int
 	requesterChan chan OperationReply
 }
 
-func (i CopyInsert) Id() int {
+func (i Copyinsert) ID() int {
 	return i.id
 }
 
-func (i CopyInsert) Elem() int {
+func (i Copyinsert) Elem() int {
 	return i.elem
 }
 
-func (i CopyInsert) RequesterChan() chan OperationReply {
+func (i Copyinsert) RequesterChan() chan OperationReply {
 	return i.requesterChan
 }
 
-func (i CopyInsert) Perform(node *BinaryTreeNode) {
+func (i Copyinsert) Perform(node *binaryTreeNode) {
 	if i.elem == node.elem {
 		node.removed = false
-		i.requesterChan <- OperationFinished{i.id}
+		i.requesterChan <- operationFinished{i.id}
 	} else if i.elem < node.elem {
 		if node.left != nil {
 			node.leftChan() <- i
 		} else {
-			node.left = makeBinaryTreeNode(i.elem, false)
+			node.left = makebinaryTreeNode(i.elem, false)
 			node.left.parent = node.childReply
-			i.requesterChan <- OperationFinished{i.id}
+			i.requesterChan <- operationFinished{i.id}
 		}
 	} else if i.elem > node.elem {
 		if node.right != nil {
 			node.rightChan() <- i
 		} else {
-			node.right = makeBinaryTreeNode(i.elem, false)
+			node.right = makebinaryTreeNode(i.elem, false)
 			node.right.parent = node.childReply
-			i.requesterChan <- OperationFinished{i.id}
+			i.requesterChan <- operationFinished{i.id}
 		}
 	}
 }
 
-func (i CopyInsert) String() string {
-	return fmt.Sprintf("Insert(id: %d, elem: %d)", i.id, i.elem)
+func (i Copyinsert) String() string {
+	return fmt.Sprintf("insert(id: %d, elem: %d)", i.id, i.elem)
 }
