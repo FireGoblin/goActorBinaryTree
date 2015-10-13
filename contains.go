@@ -5,7 +5,7 @@ import "fmt"
 type contains struct {
 	id            int
 	elem          int
-	requesterChan chan OperationReply
+	requesterChan chan operationReply
 }
 
 func (c contains) ID() int {
@@ -16,7 +16,7 @@ func (c contains) Elem() int {
 	return c.elem
 }
 
-func (c contains) RequesterChan() chan OperationReply {
+func (c contains) RequesterChan() chan operationReply {
 	return c.requesterChan
 }
 
@@ -38,6 +38,6 @@ func (c contains) Perform(node *binaryTreeNode) {
 	}
 }
 
-func (i contains) String() string {
-	return fmt.Sprintf("contains(id: %d, elem: %d)", i.id, i.elem)
+func (c contains) String() string {
+	return fmt.Sprintf("contains(id: %d, elem: %d)", c.id, c.elem)
 }

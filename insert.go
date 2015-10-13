@@ -5,7 +5,7 @@ import "fmt"
 type insert struct {
 	id            int
 	elem          int
-	requesterChan chan OperationReply
+	requesterChan chan operationReply
 }
 
 func (i insert) ID() int {
@@ -16,7 +16,7 @@ func (i insert) Elem() int {
 	return i.elem
 }
 
-func (i insert) RequesterChan() chan OperationReply {
+func (i insert) RequesterChan() chan operationReply {
 	return i.requesterChan
 }
 

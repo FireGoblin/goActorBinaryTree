@@ -4,10 +4,10 @@ import "fmt"
 import "sync"
 
 type binaryTreeNode struct {
-	parent chan OperationReply
+	parent chan operationReply
 
-	opChan     chan Operation
-	childReply chan OperationReply
+	opChan     chan operation
+	childReply chan operationReply
 
 	left  *binaryTreeNode //use left.opChan for sending operations to it
 	right *binaryTreeNode //use right.opChan for sending operations to it
@@ -16,7 +16,7 @@ type binaryTreeNode struct {
 	removed bool
 
 	//elements for tracking gc
-	gcOperationResponses ReplyTracker
+	gcoperationResponses ReplyTracker
 	getElemResponse      operationFinished
 }
 
@@ -24,7 +24,7 @@ func (b *binaryTreeNode) String() string {
 	return fmt.Sprintf("Node(elem: %d, removed: %t)", b.elem, b.removed)
 }
 
-func (b *binaryTreeNode) leftChan() chan Operation {
+func (b *binaryTreeNode) leftChan() chan operation {
 	if b.left == nil {
 		return nil
 	}
@@ -32,7 +32,7 @@ func (b *binaryTreeNode) leftChan() chan Operation {
 	return b.left.opChan
 }
 
-func (b *binaryTreeNode) rightChan() chan Operation {
+func (b *binaryTreeNode) rightChan() chan operation {
 	if b.right == nil {
 		return nil
 	}
@@ -42,7 +42,7 @@ func (b *binaryTreeNode) rightChan() chan Operation {
 
 func makebinaryTreeNode(element int, initiallyremoved bool) *binaryTreeNode {
 	//TODO: Tweak buffer sizes
-	x := binaryTreeNode{nil, make(chan Operation, 1024), make(chan OperationReply, 32), nil, nil, element, initiallyremoved, ReplyTracker{make(map[int]bool), &sync.Mutex{}}, operationFinished{0}}
+	x := binaryTreeNode{nil, make(chan operation, 1024), make(chan operationReply, 32), nil, nil, element, initiallyremoved, ReplyTracker{make(map[int]bool), &sync.Mutex{}}, operationFinished{0}}
 	go x.Run()
 	return &x
 }
@@ -53,8 +53,8 @@ func (b *binaryTreeNode) Run() {
 		case op := <-b.opChan:
 			op.Perform(b)
 		case opRep := <-b.childReply:
-			b.gcOperationResponses.receivedReply(opRep)
-			if b.gcOperationResponses.checkAllReceived() {
+			b.gcoperationResponses.receivedReply(opRep)
+			if b.gcoperationResponses.checkAllReceived() {
 				b.parent <- b.getElemResponse
 				b.left = nil
 				b.right = nil

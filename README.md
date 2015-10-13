@@ -11,9 +11,9 @@ removed nodes (besides the root 0 node which may or may not be removed).
 
 Porting from scala
 
-The interfaces Operation and OperationReply were originally traits in the scala code.  Perform() was the new function
-for the golang implementation of Operations.  In Scala used its pattern matching to have a large match statement in
-BinaryTreeSet and binaryTreeNode that had what to do with every Operation and Reply.  This could be done in golang, 
+The interfaces operation and operationReply were originally traits in the scala code.  Perform() was the new function
+for the golang implementation of operations.  In Scala used its pattern matching to have a large match statement in
+BinaryTreeSet and binaryTreeNode that had what to do with every operation and Reply.  This could be done in golang, 
 but it seemed better to have the function for performing the operation actually in the file with the operation than
 forcing binaryTreeNode to contain the code for every operation in it.  It also makes for much smaller and more 
 manageable Run commands for nodes, and allows for the addition of new operations without changing Run() commands.
@@ -27,7 +27,7 @@ where it can't do anything until receives something on a channel, but apparently
 Dealing with race conditions
 
 There were two race conditions ran into.  One of them lead to adding the mutex to reply_tracker to coordinate map accesses.
-The other lead to using injectOperation() in tests instead of sendOperation() so all actions performed by the testProbe
+The other lead to using injectoperation() in tests instead of sendoperation() so all actions performed by the testProbe
 go through the Run() routine instead of concurrently to it.
 
 TODO
@@ -72,7 +72,7 @@ func (c contains) ID() int
 
 func (c contains) Perform(node *binaryTreeNode)
 
-func (c contains) RequesterChan() chan OperationReply
+func (c contains) RequesterChan() chan operationReply
 
 func (i contains) String() string
 
@@ -86,19 +86,19 @@ func (c containsResult) Result() bool
 
 func (c containsResult) String() string
 
-type Copyinsert struct {
+type copyInsert struct {
     // contains filtered or unexported fields
 }
 
-func (i Copyinsert) Elem() int
+func (i copyInsert) Elem() int
 
-func (i Copyinsert) ID() int
+func (i copyInsert) ID() int
 
-func (i Copyinsert) Perform(node *binaryTreeNode)
+func (i copyInsert) Perform(node *binaryTreeNode)
 
-func (i Copyinsert) RequesterChan() chan OperationReply
+func (i copyInsert) RequesterChan() chan operationReply
 
-func (i Copyinsert) String() string
+func (i copyInsert) String() string
 
 type gc struct{}
     dummy operation
@@ -109,7 +109,7 @@ func (g gc) ID() int
 
 func (g gc) Perform(node *binaryTreeNode)
 
-func (g gc) RequesterChan() chan OperationReply
+func (g gc) RequesterChan() chan operationReply
 
 func (g gc) String() string
 
@@ -123,7 +123,7 @@ func (i getElems) ID() int
 
 func (i getElems) Perform(node *binaryTreeNode)
 
-func (i getElems) RequesterChan() chan OperationReply
+func (i getElems) RequesterChan() chan operationReply
 
 func (i getElems) String() string
 
@@ -137,14 +137,14 @@ func (i insert) ID() int
 
 func (i insert) Perform(node *binaryTreeNode)
 
-func (i insert) RequesterChan() chan OperationReply
+func (i insert) RequesterChan() chan operationReply
 
 func (i insert) String() string
 
-type Operation interface {
+type operation interface {
     ID() int
     Elem() int
-    RequesterChan() chan OperationReply
+    RequesterChan() chan operationReply
     Perform(*binaryTreeNode)
 }
 
@@ -156,10 +156,10 @@ func (o operationFinished) ID() int
 
 func (o operationFinished) String() string
 
-type OperationReply interface {
+type operationReply interface {
     ID() int
 }
-    note that any operation also satisfies OperationReply
+    note that any operation also satisfies operationReply
 
 type remove struct {
     // contains filtered or unexported fields
@@ -171,7 +171,7 @@ func (r remove) ID() int
 
 func (r remove) Perform(node *binaryTreeNode)
 
-func (r remove) RequesterChan() chan OperationReply
+func (r remove) RequesterChan() chan operationReply
 
 func (i remove) String() string
 

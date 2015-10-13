@@ -4,8 +4,8 @@ import "math"
 
 //BinaryTreeSet
 type BinaryTreeSet struct {
-	opChan     chan Operation
-	childReply chan OperationReply
+	opChan     chan operation
+	childReply chan operationReply
 
 	root         *binaryTreeNode
 	transferRoot *binaryTreeNode
@@ -15,7 +15,7 @@ type BinaryTreeSet struct {
 	done chan bool
 }
 
-func (b *BinaryTreeSet) rootChan() chan Operation {
+func (b *BinaryTreeSet) rootChan() chan operation {
 	if b.root == nil {
 		return nil
 	}
@@ -23,7 +23,7 @@ func (b *BinaryTreeSet) rootChan() chan Operation {
 	return b.root.opChan
 }
 
-func (b *BinaryTreeSet) transferRootChan() chan Operation {
+func (b *BinaryTreeSet) transferRootChan() chan operation {
 	if b.root == nil {
 		return nil
 	}
@@ -32,7 +32,7 @@ func (b *BinaryTreeSet) transferRootChan() chan Operation {
 }
 
 func MakeBinaryTreeSet() *BinaryTreeSet {
-	x := BinaryTreeSet{make(chan Operation, 1024), make(chan OperationReply, 32), makebinaryTreeNode(0, true), nil, -1, make(chan bool, 1)}
+	x := BinaryTreeSet{make(chan operation, 1024), make(chan operationReply, 32), makebinaryTreeNode(0, true), nil, -1, make(chan bool, 1)}
 	x.root.parent = x.childReply
 	go x.Run()
 	return &x
@@ -81,11 +81,11 @@ func (b *BinaryTreeSet) rungc() {
 				} else {
 					panic("received bad id for operationFinished")
 				}
-			case Copyinsert:
-				c := opRep.(Copyinsert)
+			case copyInsert:
+				c := opRep.(copyInsert)
 				b.transferRootChan() <- c
 			default:
-				panic("should only receive operationFinished and Copyinsert in childReply at root")
+				panic("should only receive operationFinished and copyInsert in childReply at root")
 			}
 		}
 	}

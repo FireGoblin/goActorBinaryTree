@@ -13,7 +13,7 @@ func (g gc) Elem() int {
 	return 0
 }
 
-func (g gc) RequesterChan() chan OperationReply {
+func (g gc) RequesterChan() chan operationReply {
 	return nil
 }
 

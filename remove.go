@@ -5,7 +5,7 @@ import "fmt"
 type remove struct {
 	id            int
 	elem          int
-	requesterChan chan OperationReply
+	requesterChan chan operationReply
 }
 
 func (r remove) ID() int {
@@ -16,7 +16,7 @@ func (r remove) Elem() int {
 	return r.elem
 }
 
-func (r remove) RequesterChan() chan OperationReply {
+func (r remove) RequesterChan() chan operationReply {
 	return r.requesterChan
 }
 

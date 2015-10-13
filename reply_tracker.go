@@ -8,13 +8,13 @@ type ReplyTracker struct {
 	key *sync.Mutex
 }
 
-func (r ReplyTracker) sentOp(o Operation) {
+func (r ReplyTracker) sentOp(o operation) {
 	r.key.Lock()
 	r.m[o.ID()] = true
 	r.key.Unlock()
 }
 
-func (r ReplyTracker) receivedReply(o OperationReply) error {
+func (r ReplyTracker) receivedReply(o operationReply) error {
 	r.key.Lock()
 	if !r.m[o.ID()] {
 		r.key.Unlock()

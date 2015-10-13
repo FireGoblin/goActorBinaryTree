@@ -10,7 +10,7 @@ func TestinsertsAndcontains(t *testing.T) {
 	testProbe := makeTestProbe()
 
 	one := testProbe.makecontains(1)
-	testProbe.sendOperation(one)
+	testProbe.sendoperation(one)
 	oneResult := <-testProbe.childReply
 
 	x, ok := oneResult.(containsResult)
@@ -24,8 +24,8 @@ func TestinsertsAndcontains(t *testing.T) {
 
 	two := testProbe.makeinsert(1)
 	three := testProbe.makecontains(1)
-	testProbe.sendOperation(two)
-	testProbe.sendOperation(three)
+	testProbe.sendoperation(two)
+	testProbe.sendoperation(three)
 
 	twoResult := <-testProbe.childReply
 	threeResult := <-testProbe.childReply
@@ -60,7 +60,7 @@ func TestInstructionExample(t *testing.T) {
 
 	go testProbe.Run(succeed, fail)
 
-	var ops []Operation
+	var ops []operation
 	ops = append(ops, testProbe.makeinsert(1))
 	ops = append(ops, testProbe.makecontains(2))
 	ops = append(ops, testProbe.makeremove(1))
@@ -69,7 +69,7 @@ func TestInstructionExample(t *testing.T) {
 	ops = append(ops, testProbe.makecontains(2))
 
 	for _, op := range ops {
-		testProbe.sendOperation(op)
+		testProbe.sendoperation(op)
 		time.Sleep(1 * time.Millisecond)
 	}
 
@@ -89,8 +89,8 @@ func TestSmallgc(t *testing.T) {
 
 	go testProbe.Run(succeed, fail)
 
-	var opsBefore []Operation
-	var opsAfter []Operation
+	var opsBefore []operation
+	var opsAfter []operation
 
 	opsBefore = append(opsBefore, testProbe.makeinsert(-122))
 	opsBefore = append(opsBefore, testProbe.makeinsert(99))
@@ -105,7 +105,7 @@ func TestSmallgc(t *testing.T) {
 	opsAfter = append(opsAfter, testProbe.makecontains(777))
 
 	for _, op := range opsBefore {
-		testProbe.sendOperation(op)
+		testProbe.sendoperation(op)
 		time.Sleep(1 * time.Millisecond)
 	}
 
@@ -113,7 +113,7 @@ func TestSmallgc(t *testing.T) {
 	time.Sleep(1 * time.Millisecond)
 
 	for _, op := range opsAfter {
-		testProbe.sendOperation(op)
+		testProbe.sendoperation(op)
 		time.Sleep(1 * time.Millisecond)
 	}
 
@@ -138,9 +138,9 @@ func TestWorkWithgc(t *testing.T) {
 	start := time.Now()
 
 	for i := 0; i < count; i++ {
-		op := testProbe.randomOperation()
+		op := testProbe.randomoperation()
 
-		testProbe.injectOperation(op)
+		testProbe.injectoperation(op)
 
 		if testProbe.rng.Float32() < 0.01 {
 			testProbe.injectgc()

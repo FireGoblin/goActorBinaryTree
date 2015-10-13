@@ -1,8 +1,8 @@
 package ActorBinaryTree
 
-type Operation interface {
+type operation interface {
 	ID() int
 	Elem() int
-	RequesterChan() chan OperationReply
+	RequesterChan() chan operationReply
 	Perform(*binaryTreeNode)
 }

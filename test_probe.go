@@ -9,8 +9,8 @@ import (
 )
 
 type TestProbe struct {
-	opChan     chan Operation
-	childReply chan OperationReply
+	opChan     chan operation
+	childReply chan operationReply
 
 	tree *BinaryTreeSet
 
@@ -40,7 +40,7 @@ func (t *TestProbe) Run(succeed chan int, fail chan int) {
 				return
 			}
 		case op := <-t.opChan:
-			t.sendOperation(op)
+			t.sendoperation(op)
 		case <-time.After(1 * time.Second):
 			fmt.Println("checking all replies received")
 			if !t.checkReceviedAllResponses() {
@@ -48,25 +48,25 @@ func (t *TestProbe) Run(succeed chan int, fail chan int) {
 				t.displayUnreceived()
 				fail <- t.replyCount
 				return
-			} else {
-				fmt.Println("all responses received")
-				succeed <- t.replyCount
-				return
 			}
+
+			fmt.Println("all responses received")
+			succeed <- t.replyCount
+			return
 		}
 	}
 }
 
 func makeTestProbe() *TestProbe {
-	x := TestProbe{make(chan Operation, 1024), make(chan OperationReply, 1024), MakeBinaryTreeSet(), make(map[int]bool), make(map[int]bool), ReplyTracker{make(map[int]bool), &sync.Mutex{}}, 1, rand.New(rand.NewSource(777)), 0}
+	x := TestProbe{make(chan operation, 1024), make(chan operationReply, 1024), MakeBinaryTreeSet(), make(map[int]bool), make(map[int]bool), ReplyTracker{make(map[int]bool), &sync.Mutex{}}, 1, rand.New(rand.NewSource(777)), 0}
 	return &x
 }
 
-func (t *TestProbe) childChan() chan Operation {
+func (t *TestProbe) childChan() chan operation {
 	return t.tree.opChan
 }
 
-func (t *TestProbe) sendOperation(o Operation) error {
+func (t *TestProbe) sendoperation(o operation) error {
 	switch o.(type) {
 	case insert:
 		t.currentTree[o.Elem()] = true
@@ -87,7 +87,7 @@ func (t *TestProbe) sendOperation(o Operation) error {
 	return nil
 }
 
-func (t *TestProbe) injectOperation(o Operation) {
+func (t *TestProbe) injectoperation(o operation) {
 	t.opChan <- o
 }
 
@@ -95,25 +95,25 @@ func (t *TestProbe) injectgc() {
 	t.opChan <- gc{}
 }
 
-func (t *TestProbe) checkReply(o OperationReply) bool {
+func (t *TestProbe) checkReply(o operationReply) bool {
 	switch o.(type) {
 	case operationFinished:
 		if t.finishedResponses.get(o.ID()) {
 			t.finishedResponses.receivedReply(o)
 			return true
-		} else {
-			fmt.Println("failing reply", o)
-			return false
 		}
+
+		fmt.Println("failing reply", o)
+		return false
 	case containsResult:
 		c := o.(containsResult)
 		if t.finishedResponses.get(c.ID()) && t.expectedResponses[c.ID()] == c.Result() {
 			t.finishedResponses.receivedReply(c)
 			return true
-		} else {
-			fmt.Println("failing reply", o)
-			return false
 		}
+
+		fmt.Println("failing reply", o)
+		return false
 	default:
 		return false
 	}
@@ -200,7 +200,7 @@ func (t *TestProbe) randomElement32() int {
 	return int(val)
 }
 
-func (t *TestProbe) randomOperation() Operation {
+func (t *TestProbe) randomoperation() operation {
 	val := t.rng.Int31n(4)
 
 	switch val {

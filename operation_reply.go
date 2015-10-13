@@ -1,6 +1,6 @@
 package ActorBinaryTree
 
-//note that any operation also satisfies OperationReply
-type OperationReply interface {
+//note that any operation also satisfies operationReply
+type operationReply interface {
 	ID() int
 }

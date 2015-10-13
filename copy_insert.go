@@ -2,25 +2,25 @@ package ActorBinaryTree
 
 import "fmt"
 
-type Copyinsert struct {
+type copyInsert struct {
 	id            int
 	elem          int
-	requesterChan chan OperationReply
+	requesterChan chan operationReply
 }
 
-func (i Copyinsert) ID() int {
+func (i copyInsert) ID() int {
 	return i.id
 }
 
-func (i Copyinsert) Elem() int {
+func (i copyInsert) Elem() int {
 	return i.elem
 }
 
-func (i Copyinsert) RequesterChan() chan OperationReply {
+func (i copyInsert) RequesterChan() chan operationReply {
 	return i.requesterChan
 }
 
-func (i Copyinsert) Perform(node *binaryTreeNode) {
+func (i copyInsert) Perform(node *binaryTreeNode) {
 	if i.elem == node.elem {
 		node.removed = false
 		i.requesterChan <- operationFinished{i.id}
@@ -43,6 +43,6 @@ func (i Copyinsert) Perform(node *binaryTreeNode) {
 	}
 }
 
-func (i Copyinsert) String() string {
+func (i copyInsert) String() string {
 	return fmt.Sprintf("insert(id: %d, elem: %d)", i.id, i.elem)
 }
