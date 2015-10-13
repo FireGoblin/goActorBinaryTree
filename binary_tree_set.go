@@ -3,6 +3,7 @@ package ActorBinaryTree
 import "math"
 
 // BinaryTreeSet
+// The main structure that user communicates with.
 type BinaryTreeSet struct {
 	opChan     chan operation
 	childReply chan operationReply
@@ -31,6 +32,8 @@ func (b *BinaryTreeSet) transferRootChan() chan operation {
 	return b.transferRoot.opChan
 }
 
+// MakeBinaryTreeSet
+// function to create a new BinaryTreeSet
 func MakeBinaryTreeSet() *BinaryTreeSet {
 	x := BinaryTreeSet{make(chan operation, 1024), make(chan operationReply, 32), makeBinaryTreeNode(0, true), nil, -1, make(chan bool, 1)}
 	x.root.parent = x.childReply
