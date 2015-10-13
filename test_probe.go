@@ -58,7 +58,7 @@ func (t *testProbe) run(succeed chan int, fail chan int) {
 }
 
 func maketestProbe() *testProbe {
-	x := testProbe{make(chan operation, 32768), make(chan operationReply, 1024), MakeBinaryTreeSet(), make(map[int]bool), make(map[int]bool), replyTracker{make(map[int]bool), &sync.Mutex{}}, 1, rand.New(rand.NewSource(777)), 0}
+	x := testProbe{make(chan operation, 1024), make(chan operationReply, 1024), MakeBinaryTreeSet(), make(map[int]bool), make(map[int]bool), replyTracker{make(map[int]bool), &sync.Mutex{}}, 1, rand.New(rand.NewSource(777)), 0}
 	return &x
 }
 
