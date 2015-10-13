@@ -78,9 +78,9 @@ func (b *BinaryTreeSet) rungc() {
 					b.root = b.transferRoot
 					b.transferRoot = nil
 					return
-				} else {
-					panic("received bad id for operationFinished")
 				}
+
+				panic("received bad id for operationFinished")
 			case copyInsert:
 				c := opRep.(copyInsert)
 				b.transferRootChan() <- c

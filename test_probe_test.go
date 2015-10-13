@@ -76,7 +76,7 @@ func TestInstructionExample(t *testing.T) {
 	select {
 	case <-succeed:
 	case <-fail:
-		t.FailNow()
+		t.Fatal("Test failed. received message on fail channel.")
 	}
 }
 
@@ -120,7 +120,7 @@ func TestSmallgc(t *testing.T) {
 	select {
 	case <-succeed:
 	case <-fail:
-		t.FailNow()
+		t.Fatal("Test failed. received message on fail channel.")
 	}
 }
 
@@ -128,10 +128,10 @@ func TestWorkWithgc(t *testing.T) {
 	fmt.Println("--------------------------")
 	testProbe := maketestProbe()
 
-	succeed := make(chan int)
+	success := make(chan int)
 	fail := make(chan int)
 
-	go testProbe.run(succeed, fail)
+	go testProbe.run(success, fail)
 
 	count := 100000
 
@@ -155,14 +155,14 @@ func TestWorkWithgc(t *testing.T) {
 	start = time.Now()
 
 	select {
-	case c := <-succeed:
+	case c := <-success:
 		fmt.Println(c)
 		if c != count {
-			t.FailNow()
+			t.Fatal("Test failed. wrong count returned on success channel.")
 		}
 	case c := <-fail:
 		fmt.Println(c)
-		t.FailNow()
+		t.Fatal("Test failed. received message on fail channel.")
 	}
 
 	elapsed = time.Since(start)
