@@ -31,9 +31,9 @@ func (b *BinaryTreeSet) transferRootChan() chan operation {
 	return b.transferRoot.opChan
 }
 
-// MakeBinaryTreeSet is the function to create a new BinaryTreeSet
-func MakeBinaryTreeSet() *BinaryTreeSet {
-	x := BinaryTreeSet{make(chan operation, 1024), make(chan operationReply, 1024), makeBinaryTreeNode(0, true), nil, -1, make(chan bool, 1)}
+// NewBinaryTreeSet is the function to create a new BinaryTreeSet
+func NewBinaryTreeSet() *BinaryTreeSet {
+	x := BinaryTreeSet{make(chan operation, 1024), make(chan operationReply, 1024), newBinaryTreeNode(0, true), nil, -1, make(chan bool, 1)}
 	x.root.parent = x.childReply
 	go x.run()
 	return &x
@@ -52,7 +52,7 @@ func (b *BinaryTreeSet) run() {
 		case op := <-b.opChan:
 			_, ok := op.(gc)
 			if ok {
-				b.transferRoot = makeBinaryTreeNode(0, true)
+				b.transferRoot = newBinaryTreeNode(0, true)
 				b.transferRoot.parent = b.childReply
 				b.rungc()
 			} else {
